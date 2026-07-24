@@ -61,8 +61,8 @@ echo.
 echo [4/4] Starting Local WebServer on http://localhost:3000...
 echo.
 echo ===================================================================
-echo  📋 Customer Webform:      http://localhost:3000/
-echo  📊 Admin & Infographics:  http://localhost:3000/admin.html
+echo   Customer Webform:   http://localhost:3000/
+echo   Admin Dashboard:    http://localhost:3000/admin.html
 echo ===================================================================
 echo.
 echo Launching default browser...
