@@ -134,7 +134,7 @@
         <!-- Settings Button -->
         <button onclick="openConfigModal()" class="btn-action bg-white border border-slate-200 hover:border-slate-300 text-slate-700 font-semibold px-3 py-2 rounded-xl text-xs flex items-center space-x-2 shadow-sm">
           <i class="fa-solid fa-sliders text-slate-400"></i>
-          <span>DB Settings</span>
+          <span>Settings</span>
         </button>
 
         <!-- Print Executive Summary Report Button -->
@@ -1016,7 +1016,23 @@
       const total = data.length;
       document.getElementById('kpi-total-count').innerText = total;
 
-      if (total === 0) return;
+      if (total === 0) {
+        ['appropriateness', 'beneficial', 'timeliness', 'attitude', 'gender', 'overall'].forEach(key => {
+          const elScore = document.getElementById(`score-${key}`);
+          const elBar = document.getElementById(`bar-${key}`);
+          if (elScore) elScore.innerText = `0.0 / 5.0`;
+          if (elBar) elBar.style.width = `0%`;
+        });
+        document.getElementById('kpi-avg-score').innerText = '0.0';
+        document.getElementById('kpi-sat-index').innerText = '0%';
+        document.getElementById('kpi-star-rating').innerHTML = '<i class="fa-regular fa-star"></i>'.repeat(5);
+        for (let s = 1; s <= 5; s++) {
+          const el = document.getElementById(`dist-${s}`);
+          if (el) el.innerText = '0 (0%)';
+        }
+        document.getElementById('executive-insight-text').innerText = 'Awaiting feedback responses. Quantitative rating computation will update automatically.';
+        return;
+      }
 
       const criteriaKeys = ['appropriateness', 'beneficial', 'timeliness', 'attitude', 'gender', 'overall'];
       const sums = { appropriateness: 0, beneficial: 0, timeliness: 0, attitude: 0, gender: 0, overall: 0 };
@@ -1390,14 +1406,18 @@
         const data = await res.json();
         if (data.success) {
           alert('Database cleared successfully.');
-          fetchResponses();
+          responsesData = [];
+          updateAnalytics([]);
+          renderTable([]);
           fetchHealth();
         } else {
           alert('Failed to clear database: ' + (data.error || 'Unknown error'));
         }
       } catch (err) {
         alert('Database cleared locally! (' + err.message + ')');
-        fetchResponses();
+        responsesData = [];
+        updateAnalytics([]);
+        renderTable([]);
         fetchHealth();
       }
     }
