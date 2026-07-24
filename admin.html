@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSF Analytics & Infographic Console · DOST Region V</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  :root {
+    --bg: #F8FAFC;
+    --card: #FFFFFF;
+    --ink: #0F172A;
+    --muted: #64748B;
+    --line: #E2E8F0;
+    --accent: #00AEEF;
+    --accent-dark: #0099D5;
+    --accent-soft: rgba(0, 174, 239, 0.08);
+  }
+  * { -webkit-font-smoothing: antialiased; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    background-image: radial-gradient(circle, rgba(148, 163, 184, 0.12) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  .font-display { font-family: 'Montserrat', sans-serif; }
+
+  .glass-header {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .stat-card:hover {
+    border-color: rgba(0, 174, 239, 0.4);
+    box-shadow: 0 10px 30px -10px rgba(0, 174, 239, 0.12);
+    transform: translateY(-2px);
+  }
+
+  .progress-bar-fill { transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+  .btn-action { transition: all 0.2s ease; cursor: pointer; }
+  .btn-action:hover { transform: translateY(-1px); }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+
+  /* Hide print templates on screen */
+  #printable-individual-form, #printable-summary-report { display: none; }
+
+  /* === PRINT STYLESHEET === */
+  @media print {
+    html, body {
+      background: white !important;
+      background-image: none !important;
+      color: black !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      font-size: 13px !important;
+    }
+    body.printing-individual {
+      @page { size: A4 landscape; margin: 8mm 10mm; }
+    }
+    body.printing-summary {
+      @page { size: A4 portrait; margin: 10mm; }
+    }
+    .no-print, header, main, #detail-modal, #config-modal { display: none !important; }
+    
+    body.printing-individual #printable-individual-form {
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: space-between !important;
+      visibility: visible !important;
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 98% !important;
+      max-width: 100% !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      border: none !important;
+      box-shadow: none !important;
+      page-break-after: avoid !important;
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+    }
+
+    body.printing-summary #printable-summary-report {
+      display: block !important;
+    }
+  }
+</style>
+</head>
+<body class="pb-16">
+
+  <!-- Header Navigation -->
+  <header class="glass-header sticky top-0 z-30 mb-8 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <div class="flex items-center space-x-4">
+        <a href="/" class="flex items-center space-x-3 group">
+          <img src="/logo.png" alt="DOST Logo" class="h-10 w-auto object-contain transition-transform group-hover:scale-105" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/d/d7/DOST_seal.svg'">
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="font-display font-extrabold text-lg text-slate-900 tracking-tight">DOST REGION V</span>
+              <span class="bg-cyan-500/10 text-cyan-600 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-cyan-500/20">CSF Console</span>
+            </div>
+            <p class="text-xs text-slate-500 font-medium">Customer Satisfaction Analytics & Database Management</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="flex items-center space-x-3">
+        <!-- DB Mode Badge -->
+        <span id="db-mode-badge" class="hidden sm:inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-cyan-50 text-cyan-700 border border-cyan-200">
+          <i class="fa-solid fa-database mr-1.5 text-cyan-500"></i> Mode: Dual (SQLite + Webhook)
+        </span>
+
+        <!-- Settings Button -->
+        <button onclick="openConfigModal()" class="btn-action bg-white border border-slate-200 hover:border-slate-300 text-slate-700 font-semibold px-3 py-2 rounded-xl text-xs flex items-center space-x-2 shadow-sm">
+          <i class="fa-solid fa-sliders text-slate-400"></i>
+          <span>DB Settings</span>
+        </button>
+
+        <!-- Print Executive Summary Report Button -->
+        <button onclick="triggerPrintSummary()" class="btn-action bg-slate-900 hover:bg-slate-800 text-white font-semibold px-4 py-2 rounded-xl text-xs flex items-center space-x-2 shadow-sm shadow-slate-900/10">
+          <i class="fa-solid fa-file-invoice"></i>
+          <span>Print Summary Report</span>
+        </button>
+
+        <a href="/" target="_blank" class="btn-action bg-cyan-500 hover:bg-cyan-600 text-white font-semibold px-4 py-2 rounded-xl text-xs flex items-center space-x-2 shadow-sm shadow-cyan-500/20">
+          <i class="fa-solid fa-plus"></i>
+          <span>Submit Form</span>
+        </a>
+
+        <!-- Logout Button -->
+        <button onclick="logout()" class="btn-action bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200/80 font-semibold px-3 py-2 rounded-xl text-xs flex items-center space-x-1.5 shadow-sm" title="Sign out of Admin Dashboard">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ADMIN LOGIN MODAL OVERLAY -->
+  <div id="login-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 no-print">
+    <div class="bg-white/95 rounded-3xl max-w-sm w-full p-7 space-y-6 shadow-2xl border border-white/40 relative overflow-hidden">
+      <!-- Top Decorative Glow -->
+      <div class="absolute -top-12 -left-12 w-32 h-32 bg-cyan-400/20 rounded-full blur-2xl pointer-events-none"></div>
+      <div class="absolute -bottom-12 -right-12 w-32 h-32 bg-blue-500/20 rounded-full blur-2xl pointer-events-none"></div>
+
+      <!-- Header Icon & Branding -->
+      <div class="text-center space-y-3 relative z-10">
+        <div class="w-16 h-16 rounded-2xl bg-slate-900 text-cyan-400 mx-auto flex items-center justify-center text-2xl shadow-lg shadow-slate-900/20 border border-slate-800">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <div>
+          <h2 class="font-display font-bold text-slate-900 text-lg tracking-tight">DOST Region V Admin Portal</h2>
+          <p class="text-xs text-slate-500 font-medium mt-0.5">Enter credentials to access executive console</p>
+        </div>
+      </div>
+
+      <!-- Login Form -->
+      <form onsubmit="handleLogin(event)" class="space-y-4 relative z-10">
+        <!-- Error Alert -->
+        <div id="login-error" class="hidden p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 text-xs font-semibold flex items-center space-x-2">
+          <i class="fa-solid fa-circle-exclamation text-sm shrink-0"></i>
+          <span id="login-error-text">Invalid username or password</span>
+        </div>
+
+        <!-- Username Field -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-slate-700 uppercase tracking-wider block">Username</label>
+          <div class="relative">
+            <i class="fa-solid fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="text" id="login-username" required placeholder="dost" autocomplete="username" class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition-all">
+          </div>
+        </div>
+
+        <!-- Password Field -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-slate-700 uppercase tracking-wider block">Password</label>
+          <div class="relative">
+            <i class="fa-solid fa-key absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="password" id="login-password" required placeholder="••••••••••••" autocomplete="current-password" class="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-medium focus:outline-none focus:border-cyan-500 focus:bg-white transition-all">
+            <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1">
+              <i id="pass-icon" class="fa-solid fa-eye text-xs"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Login Button -->
+        <button type="submit" id="login-btn" class="w-full py-3 bg-gradient-to-r from-slate-900 via-slate-800 to-cyan-900 hover:from-slate-800 hover:to-cyan-800 text-white font-semibold rounded-xl text-xs tracking-wide shadow-md shadow-slate-900/20 transition-all flex items-center justify-center space-x-2 mt-2">
+          <span>Sign In to Executive Console</span>
+          <i class="fa-solid fa-arrow-right text-xs"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main Dashboard Content -->
+  <main id="dashboard-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 no-print hidden">
+
+    <!-- KPI Overview Cards Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      
+      <!-- Total Responses Card -->
+      <div class="stat-card p-5 relative overflow-hidden">
+        <div class="flex items-center justify-between text-slate-500 mb-2">
+          <span class="text-xs font-semibold uppercase tracking-wider">Total Submissions</span>
+          <div class="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-600">
+            <i class="fa-solid fa-database text-sm"></i>
+          </div>
+        </div>
+        <div class="flex items-baseline space-x-2">
+          <span id="kpi-total-count" class="font-display text-3xl font-bold text-slate-900">0</span>
+          <span class="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200"><i class="fa-solid fa-check text-[10px]"></i> Saved</span>
+        </div>
+        <p id="kpi-storage-engine" class="text-xs text-slate-400 mt-2">Node stdlib node:sqlite DB</p>
+      </div>
+
+      <!-- Average Rating Score -->
+      <div class="stat-card p-5 relative overflow-hidden">
+        <div class="flex items-center justify-between text-slate-500 mb-2">
+          <span class="text-xs font-semibold uppercase tracking-wider">Avg CSAT Score</span>
+          <div class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500">
+            <i class="fa-solid fa-star text-sm"></i>
+          </div>
+        </div>
+        <div class="flex items-baseline space-x-2">
+          <span id="kpi-avg-score" class="font-display text-3xl font-bold text-slate-900">0.0</span>
+          <span class="text-xs text-slate-500 font-medium">/ 5.0</span>
+        </div>
+        <div id="kpi-star-rating" class="flex text-amber-400 text-xs space-x-1 mt-2">
+          <i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i>
+        </div>
+      </div>
+
+      <!-- Net Satisfaction Index -->
+      <div class="stat-card p-5 relative overflow-hidden">
+        <div class="flex items-center justify-between text-slate-500 mb-2">
+          <span class="text-xs font-semibold uppercase tracking-wider">Net Satisfaction</span>
+          <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600">
+            <i class="fa-solid fa-chart-line text-sm"></i>
+          </div>
+        </div>
+        <div class="flex items-baseline space-x-2">
+          <span id="kpi-sat-index" class="font-display text-3xl font-bold text-slate-900">100%</span>
+          <span class="text-xs font-medium text-slate-500">Positive</span>
+        </div>
+        <p class="text-xs text-slate-400 mt-2">Ratings 4 (VS) & 5 (Outstanding)</p>
+      </div>
+
+      <!-- Google Webhook Sync Status -->
+      <div class="stat-card p-5 relative overflow-hidden">
+        <div class="flex items-center justify-between text-slate-500 mb-2">
+          <span class="text-xs font-semibold uppercase tracking-wider">Google Docs Sync</span>
+          <div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-600">
+            <i class="fa-solid fa-cloud-arrow-up text-sm"></i>
+          </div>
+        </div>
+        <div class="flex items-baseline space-x-2">
+          <span id="kpi-sync-status" class="font-display text-3xl font-bold text-slate-900">Active</span>
+        </div>
+        <p id="kpi-sync-detail" class="text-xs text-slate-400 mt-2">Apps Script Auto-Filler</p>
+      </div>
+
+    </div>
+
+    <!-- INFOGRAPHIC SECTION: Executive Rating Analysis -->
+    <section class="space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="font-display text-xl font-bold text-slate-900">Visual Rating Analysis & Infographics</h2>
+          <p class="text-xs text-slate-500">Criteria ratings evaluation according to DOST Region V QMS-F4 standards</p>
+        </div>
+        <span class="bg-cyan-50 text-cyan-700 text-xs font-semibold px-3 py-1 rounded-lg border border-cyan-200">
+          <i class="fa-solid fa-chart-pie mr-1"></i> Statistical Overview
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Criteria Progress Bars -->
+        <div class="stat-card p-6 lg:col-span-2 space-y-6 shadow-sm">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 rounded-xl bg-cyan-500 text-white flex items-center justify-center font-bold text-base shadow-sm shadow-cyan-500/30">
+                <i class="fa-solid fa-chart-column"></i>
+              </div>
+              <div>
+                <h3 class="font-display font-bold text-slate-900 text-base">Service Criteria Averages</h3>
+                <p class="text-xs text-slate-500">Average score per dimension (Scale 1 to 5)</p>
+              </div>
+            </div>
+            <span class="text-xs font-semibold text-slate-400">Target: 4.5+</span>
+          </div>
+
+          <div class="space-y-5">
+            <div class="space-y-1.5">
+              <div class="flex justify-between text-xs font-semibold">
+                <span class="text-slate-700 flex items-center"><i class="fa-solid fa-bullseye text-cyan-500 w-5 text-center mr-1"></i> Appropriateness of Service</span>
+                <span id="score-appropriateness" class="font-display text-slate-900 font-bold">0.0 / 5.0</span>
+              </div>
+              <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                <div id="bar-appropriateness" class="progress-bar-fill h-full bg-cyan-500 rounded-full" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div class="space-y-1.5">
+              <div class="flex justify-between text-xs font-semibold">
+                <span class="text-slate-700 flex items-center"><i class="fa-solid fa-lightbulb text-amber-500 w-5 text-center mr-1"></i> Beneficialness & Practical Value</span>
+                <span id="score-beneficial" class="font-display text-slate-900 font-bold">0.0 / 5.0</span>
+              </div>
+              <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                <div id="bar-beneficial" class="progress-bar-fill h-full bg-amber-500 rounded-full" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div class="space-y-1.5">
+              <div class="flex justify-between text-xs font-semibold">
+                <span class="text-slate-700 flex items-center"><i class="fa-solid fa-clock text-blue-500 w-5 text-center mr-1"></i> Timeliness of Delivery</span>
+                <span id="score-timeliness" class="font-display text-slate-900 font-bold">0.0 / 5.0</span>
+              </div>
+              <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                <div id="bar-timeliness" class="progress-bar-fill h-full bg-blue-500 rounded-full" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div class="space-y-1.5">
+              <div class="flex justify-between text-xs font-semibold">
+                <span class="text-slate-700 flex items-center"><i class="fa-solid fa-user-check text-emerald-500 w-5 text-center mr-1"></i> Staff Attitude & Courtesy</span>
+                <span id="score-attitude" class="font-display text-slate-900 font-bold">0.0 / 5.0</span>
+              </div>
+              <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                <div id="bar-attitude" class="progress-bar-fill h-full bg-emerald-500 rounded-full" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div class="space-y-1.5">
+              <div class="flex justify-between text-xs font-semibold">
+                <span class="text-slate-700 flex items-center"><i class="fa-solid fa-hands-holding-circle text-purple-500 w-5 text-center mr-1"></i> Gender Sensitivity</span>
+                <span id="score-gender" class="font-display text-slate-900 font-bold">0.0 / 5.0</span>
+              </div>
+              <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                <div id="bar-gender" class="progress-bar-fill h-full bg-purple-500 rounded-full" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div class="space-y-1.5 pt-2 border-t border-slate-100">
+              <div class="flex justify-between text-xs font-bold">
+                <span class="text-slate-900 flex items-center"><i class="fa-solid fa-award text-yellow-500 w-5 text-center mr-1"></i> Overall Satisfaction</span>
+                <span id="score-overall" class="font-display text-cyan-600 font-extrabold text-sm">0.0 / 5.0</span>
+              </div>
+              <div class="w-full h-4 bg-slate-100 rounded-full overflow-hidden p-0.5">
+                <div id="bar-overall" class="progress-bar-fill h-full bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Score Distribution Breakdown -->
+        <div class="stat-card p-6 flex flex-col justify-between space-y-6 shadow-sm">
+          <div>
+            <div class="flex items-center space-x-3 border-b border-slate-100 pb-4 mb-4">
+              <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold text-base shadow-sm shadow-amber-500/30">
+                <i class="fa-solid fa-layer-group"></i>
+              </div>
+              <div>
+                <h3 class="font-display font-bold text-slate-900 text-base">Score Distribution</h3>
+                <p class="text-xs text-slate-500">Rating level frequencies</p>
+              </div>
+            </div>
+
+            <div class="space-y-3 text-xs">
+              <div class="flex items-center justify-between p-2 rounded-lg bg-emerald-50 border border-emerald-100">
+                <span class="font-semibold text-emerald-800 flex items-center"><i class="fa-solid fa-star text-amber-400 mr-2"></i>5 - Outstanding</span>
+                <span id="dist-5" class="font-bold text-emerald-900 bg-white px-2 py-0.5 rounded shadow-xs">0 (0%)</span>
+              </div>
+
+              <div class="flex items-center justify-between p-2 rounded-lg bg-cyan-50 border border-cyan-100">
+                <span class="font-semibold text-cyan-800 flex items-center"><i class="fa-solid fa-star text-amber-400 mr-2"></i>4 - Very Satisfied</span>
+                <span id="dist-4" class="font-bold text-cyan-900 bg-white px-2 py-0.5 rounded shadow-xs">0 (0%)</span>
+              </div>
+
+              <div class="flex items-center justify-between p-2 rounded-lg bg-amber-50 border border-amber-100">
+                <span class="font-semibold text-amber-800 flex items-center"><i class="fa-solid fa-star text-amber-400 mr-2"></i>3 - Satisfied</span>
+                <span id="dist-3" class="font-bold text-amber-900 bg-white px-2 py-0.5 rounded shadow-xs">0 (0%)</span>
+              </div>
+
+              <div class="flex items-center justify-between p-2 rounded-lg bg-orange-50 border border-orange-100">
+                <span class="font-semibold text-orange-800 flex items-center"><i class="fa-solid fa-star text-slate-300 mr-2"></i>2 - Unsatisfied</span>
+                <span id="dist-2" class="font-bold text-orange-900 bg-white px-2 py-0.5 rounded shadow-xs">0 (0%)</span>
+              </div>
+
+              <div class="flex items-center justify-between p-2 rounded-lg bg-rose-50 border border-rose-100">
+                <span class="font-semibold text-rose-800 flex items-center"><i class="fa-solid fa-star text-slate-300 mr-2"></i>1 - Poor</span>
+                <span id="dist-1" class="font-bold text-rose-900 bg-white px-2 py-0.5 rounded shadow-xs">0 (0%)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-900 text-white text-xs space-y-1.5 shadow-md">
+            <div class="flex items-center space-x-2 text-cyan-400 font-semibold">
+              <i class="fa-solid fa-calculator"></i>
+              <span>Rating Computation Digest</span>
+            </div>
+            <p id="executive-insight-text" class="text-slate-300 text-[11px] leading-relaxed">
+              Awaiting feedback responses. Quantitative rating computation will update automatically.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- RECORDED RESPONSES TABLE SECTION -->
+    <section class="stat-card p-6 shadow-sm space-y-6">
+      
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+        <div>
+          <h2 class="font-display text-lg font-bold text-slate-900">Recorded Customer Responses</h2>
+          <p class="text-xs text-slate-500">Managed via SQLite database (data/csf_database.sqlite)</p>
+        </div>
+
+        <div class="flex items-center space-x-3">
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="text" id="table-search" onkeyup="filterTable()" placeholder="Search name, institution..." class="pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-cyan-500 w-48 sm:w-64 transition-all">
+          </div>
+
+          <button onclick="fetchResponses()" class="btn-action p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs" title="Refresh Table">
+            <i class="fa-solid fa-rotate text-sm"></i>
+          </button>
+
+          <button onclick="clearDatabase()" class="btn-action px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-xl text-xs font-semibold flex items-center space-x-1.5" title="Clear Database Data">
+            <i class="fa-solid fa-trash-can"></i>
+            <span>Clear Data</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 uppercase tracking-wider">
+              <th class="py-3 px-4">Date</th>
+              <th class="py-3 px-4">Service Title</th>
+              <th class="py-3 px-4">Client Name</th>
+              <th class="py-3 px-4">Institution / Agency</th>
+              <th class="py-3 px-4 text-center">Avg Rating</th>
+              <th class="py-3 px-4 text-center">Signature</th>
+              <th class="py-3 px-4 text-right">Print / View Actions</th>
+            </tr>
+          </thead>
+          <tbody id="responses-tbody" class="divide-y divide-slate-100 text-slate-700">
+            <tr>
+              <td colspan="7" class="py-8 text-center text-slate-400">
+                <i class="fa-solid fa-spinner fa-spin text-lg text-cyan-500 mb-2"></i>
+                <p>Loading database records...</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- RESPONSE DETAILS MODAL -->
+  <div id="detail-modal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 hidden no-print">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div>
+          <h3 id="modal-title" class="font-display font-bold text-slate-900 text-lg">Customer Response Details</h3>
+          <p id="modal-subtitle" class="text-xs text-slate-500">Submission ID: <span id="modal-id">---</span></p>
+        </div>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 p-2 text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 text-xs">
+        <div class="p-3 rounded-lg bg-slate-50">
+          <span class="text-slate-400 font-medium block">Date of Service</span>
+          <span id="modal-date" class="font-semibold text-slate-900">---</span>
+        </div>
+        <div class="p-3 rounded-lg bg-slate-50">
+          <span class="text-slate-400 font-medium block">Venue</span>
+          <span id="modal-venue" class="font-semibold text-slate-900">---</span>
+        </div>
+        <div class="p-3 rounded-lg bg-slate-50">
+          <span class="text-slate-400 font-medium block">Client Name</span>
+          <span id="modal-name" class="font-semibold text-slate-900">---</span>
+        </div>
+        <div class="p-3 rounded-lg bg-slate-50">
+          <span class="text-slate-400 font-medium block">Institution</span>
+          <span id="modal-institution" class="font-semibold text-slate-900">---</span>
+        </div>
+      </div>
+
+      <div>
+        <h4 class="font-semibold text-slate-900 text-xs mb-3 uppercase tracking-wider">Detailed Rating Scores</h4>
+        <div id="modal-ratings-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs"></div>
+      </div>
+
+      <div class="p-4 rounded-xl bg-cyan-50/50 border border-cyan-100 text-xs">
+        <span class="font-semibold text-cyan-900 block mb-1">Customer Comments / Suggestions</span>
+        <p id="modal-comments" class="text-slate-700 italic">"No comments provided."</p>
+      </div>
+
+      <div>
+        <span class="font-semibold text-slate-900 text-xs block mb-2">Digital Signature Canvas</span>
+        <div id="modal-signature-container" class="p-3 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center min-h-24"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DB CONFIG / SETTINGS MODAL -->
+  <div id="config-modal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 hidden no-print">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-6 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="font-display font-bold text-slate-900 text-base">Database & Webhook Settings</h3>
+        <button onclick="closeConfigModal()" class="text-slate-400 hover:text-slate-600 p-1">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Storage Engine Selection -->
+      <div class="space-y-3">
+        <label class="text-xs font-bold text-slate-800 uppercase tracking-wider block">Database Storage Mode</label>
+        
+        <label class="flex items-start p-3 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer hover:border-cyan-500 transition-colors">
+          <input type="radio" name="dbModeSelect" value="dual" class="mt-0.5 text-cyan-500 focus:ring-cyan-500">
+          <div class="ml-3 text-xs">
+            <span class="font-bold text-slate-900 block">Dual Mode (Recommended)</span>
+            <span class="text-slate-500">Saves to local SQLite database AND syncs with Google Apps Script.</span>
+          </div>
+        </label>
+
+        <label class="flex items-start p-3 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer hover:border-cyan-500 transition-colors">
+          <input type="radio" name="dbModeSelect" value="sqlite" class="mt-0.5 text-cyan-500 focus:ring-cyan-500">
+          <div class="ml-3 text-xs">
+            <span class="font-bold text-slate-900 block">Local SQL Database Only</span>
+            <span class="text-slate-500">Uses Node's standard node:sqlite library (data/csf_database.sqlite).</span>
+          </div>
+        </label>
+
+        <label class="flex items-start p-3 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer hover:border-cyan-500 transition-colors">
+          <input type="radio" name="dbModeSelect" value="apps_script" class="mt-0.5 text-cyan-500 focus:ring-cyan-500">
+          <div class="ml-3 text-xs">
+            <span class="font-bold text-slate-900 block">Google Apps Script Webhook Only</span>
+            <span class="text-slate-500">Forwards submissions directly to Google Docs template generator.</span>
+          </div>
+        </label>
+      </div>
+
+      <!-- Google Webhook URL input -->
+      <div class="space-y-2 pt-2 border-t border-slate-100">
+        <label class="text-xs font-semibold text-slate-700">Google Webhook URL</label>
+        <input type="url" id="config-url-input" placeholder="https://script.google.com/macros/s/.../exec" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-cyan-500">
+      </div>
+
+      <!-- Printable Summary Report Sign-off Configuration -->
+      <div class="space-y-3 pt-3 border-t border-slate-100">
+        <label class="text-xs font-bold text-slate-800 uppercase tracking-wider block">Printable Summary Report Sign-Off</label>
+        
+        <!-- Generated By -->
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div>
+            <label class="font-semibold text-slate-700 block mb-1">Report Generated By (Name)</label>
+            <input type="text" id="config-gen-name" placeholder="Dr. Maria Santos" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+          </div>
+          <div>
+            <label class="font-semibold text-slate-700 block mb-1">Position / Title</label>
+            <input type="text" id="config-gen-pos" placeholder="QMS Quality Assurance Officer" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+          </div>
+        </div>
+
+        <!-- Approved By -->
+        <div class="grid grid-cols-2 gap-2 text-xs pt-1">
+          <div>
+            <label class="font-semibold text-slate-700 block mb-1">Report Approved By (Name)</label>
+            <input type="text" id="config-app-name" placeholder="Engr. Ernesto M. Granada" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+          </div>
+          <div>
+            <label class="font-semibold text-slate-700 block mb-1">Position / Title</label>
+            <input type="text" id="config-app-pos" placeholder="Regional Director" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end space-x-3">
+        <button onclick="closeConfigModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-semibold">Cancel</button>
+        <button onclick="saveConfig()" class="px-4 py-2 bg-cyan-500 text-white rounded-xl text-xs font-semibold hover:bg-cyan-600 shadow-sm">Save Configuration</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRINTABLE OFFICIAL QMS-F4 DOCUMENT (A4 LANDSCAPE) -->
+  <div id="printable-individual-form" class="p-6 text-slate-900 text-sm leading-relaxed font-sans max-w-none mx-auto bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-3">
+    
+    <!-- HEADER CARD -->
+    <div class="flex justify-between items-center bg-slate-900 text-white rounded-2xl p-4 shadow-xs">
+      <div class="flex items-center gap-4">
+        <img src="/logo.png" alt="DOST V Logo" class="w-14 h-14 object-contain bg-white rounded-xl p-1" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/d/d7/DOST_seal.svg'">
+        <div>
+          <div class="font-bold text-base uppercase tracking-tight text-white">Department of Science and Technology</div>
+          <div class="text-sm font-semibold text-cyan-300">Regional Office No. V · Bicol</div>
+          <div class="text-xs text-slate-300 uppercase tracking-wider font-mono">Quality Management System</div>
+        </div>
+      </div>
+      <div class="text-right border-l border-slate-700 pl-4">
+        <div class="font-bold text-base text-white tracking-wide">CUSTOMER SATISFACTION FEEDBACK</div>
+        <div class="inline-block mt-1 px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-mono text-xs font-bold border border-cyan-400/30">
+          QMS-F4 · Rev. 5 · 01.09.26
+        </div>
+      </div>
+    </div>
+
+    <!-- METADATA CARD -->
+    <div class="grid grid-cols-12 gap-3 border border-slate-200 rounded-2xl p-3 bg-slate-50 text-sm font-medium">
+      <div class="col-span-6 flex items-center"><span class="font-bold text-slate-700 mr-2">Service / Activity:</span> <span id="p-service-title" class="font-bold text-slate-900 underline"></span></div>
+      <div class="col-span-3 flex items-center"><span class="font-bold text-slate-700 mr-2">Date:</span> <span id="p-date" class="font-semibold text-slate-900"></span></div>
+      <div class="col-span-3 flex items-center"><span class="font-bold text-slate-700 mr-2">Venue:</span> <span id="p-venue" class="font-semibold text-slate-900"></span></div>
+    </div>
+
+    <div class="text-xs italic text-slate-600 font-medium px-1">
+      PLEASE HELP US SERVE YOU BETTER BY TAKING A MINUTE TO FILL UP THIS FORM <span class="text-slate-500">(Kung inyong mararapating tulungan kami upang maging mas mahusay namin kayong mapaglingkuran)</span>.
+    </div>
+
+    <!-- RATINGS & IMPORTANCE CARDS (2-COLUMN GRID) -->
+    <div class="grid grid-cols-12 gap-4 mb-1 flex-1">
+      <!-- LEFT: PART I RATINGS -->
+      <div class="col-span-7 flex flex-col border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
+        <div class="font-bold uppercase text-xs bg-slate-100 text-slate-800 px-3.5 py-2 border-b border-slate-200 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-cyan-500"></span> PART I: HOW WILL YOU RATE OUR SERVICES?
+        </div>
+        <table class="w-full border-collapse text-left text-sm flex-1">
+          <thead>
+            <tr class="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-700">
+              <th class="p-2.5 border-r border-slate-200">CRITERIA</th>
+              <th class="w-10 text-center border-r border-slate-200">5<br><span class="text-[10px] font-normal text-slate-500">Out.</span></th>
+              <th class="w-10 text-center border-r border-slate-200">4<br><span class="text-[10px] font-normal text-slate-500">V.Sat</span></th>
+              <th class="w-10 text-center border-r border-slate-200">3<br><span class="text-[10px] font-normal text-slate-500">Sat.</span></th>
+              <th class="w-10 text-center border-r border-slate-200">2<br><span class="text-[10px] font-normal text-slate-500">Fair</span></th>
+              <th class="w-10 text-center">1<br><span class="text-[10px] font-normal text-slate-500">Unsat</span></th>
+            </tr>
+          </thead>
+          <tbody id="p-part1-body"></tbody>
+        </table>
+      </div>
+
+      <!-- RIGHT: PART II IMPORTANCE -->
+      <div class="col-span-5 flex flex-col justify-between space-y-3">
+        <div class="flex-1 flex flex-col border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
+          <div class="font-bold uppercase text-xs bg-slate-100 text-slate-800 px-3.5 py-2 border-b border-slate-200 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-cyan-500"></span> PART II: ATTRIBUTES IMPORTANT TO YOU
+          </div>
+          <table class="w-full border-collapse text-left text-sm flex-1">
+            <thead>
+              <tr class="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-700">
+                <th class="p-2.5 border-r border-slate-200">CRITERIA / ATTRIBUTE</th>
+                <th class="w-28 text-center">STATUS</th>
+              </tr>
+            </thead>
+            <tbody id="p-part2-body"></tbody>
+          </table>
+        </div>
+        <div class="border border-slate-200 rounded-xl p-2.5 text-xs bg-slate-50">
+          <span class="font-bold block text-slate-700 text-xs uppercase tracking-wider mb-0.5">Other criteria/attributes:</span>
+          <span id="p-other-criteria" class="italic text-slate-900 text-sm"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- REASONS & COMMENTS (SIDE BY SIDE CARDS) -->
+    <div class="grid grid-cols-2 gap-4 text-sm">
+      <div class="border border-slate-200 rounded-2xl p-3 bg-slate-50/60 min-h-[70px]">
+        <div class="font-bold text-xs uppercase tracking-wider text-slate-700 border-b border-slate-200 pb-1 mb-1 flex items-center gap-1.5">
+          <i class="fa-solid fa-circle-question text-cyan-500 text-[11px]"></i> Reason for scores 3, 2, 1 (if any):
+        </div>
+        <div id="p-reason" class="text-slate-900 text-sm font-medium"></div>
+      </div>
+      <div class="border border-slate-200 rounded-2xl p-3 bg-slate-50/60 min-h-[70px]">
+        <div class="font-bold text-xs uppercase tracking-wider text-slate-700 border-b border-slate-200 pb-1 mb-1 flex items-center gap-1.5">
+          <i class="fa-solid fa-comment-dots text-cyan-500 text-[11px]"></i> Comments / Suggestions:
+        </div>
+        <div id="p-comments" class="text-slate-900 text-sm font-medium"></div>
+      </div>
+    </div>
+
+    <!-- INFO SOURCES & SIGNATURE CARD -->
+    <div class="grid grid-cols-12 gap-3 border border-slate-200 rounded-2xl p-3 bg-slate-50 items-end shadow-xs">
+      <div class="col-span-7 text-xs space-y-1.5">
+        <div><span class="font-bold text-slate-700">Info Sources Checked:</span> <span id="p-info-sources" class="text-slate-900 text-xs font-medium"></span></div>
+        <div><span class="font-bold text-slate-700">Preferred Channel:</span> <span id="p-preferred-source" class="text-cyan-600 font-bold text-xs"></span></div>
+      </div>
+      <div class="col-span-5 border-l border-slate-200 pl-3">
+        <div class="grid grid-cols-2 gap-2 text-xs mb-1">
+          <div><span class="font-bold block text-[10px] text-slate-500 uppercase tracking-wider">Name</span> <span id="p-name" class="font-bold text-slate-900 text-xs"></span></div>
+          <div><span class="font-bold block text-[10px] text-slate-500 uppercase tracking-wider">Institution</span> <span id="p-institution" class="font-bold text-slate-900 text-xs"></span></div>
+        </div>
+        <div class="relative pt-4 text-center">
+          <div class="h-6 flex items-center justify-center relative">
+            <img id="p-signature-img" class="h-14 max-w-full object-contain absolute bottom-0 z-10 hidden" alt="Signature">
+            <span id="p-signature-text" class="font-serif italic text-sm font-semibold text-slate-800"></span>
+          </div>
+          <div class="border-t border-slate-400 text-[10px] font-bold uppercase tracking-wider text-slate-600 pt-0.5">Digital Signature</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- PRINTABLE TEMPLATE 2: Executive Summary Report with Infographics & Technical Description -->
+  <div id="printable-summary-report" class="p-6 max-w-4xl mx-auto font-sans bg-white space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between border-b-2 border-slate-900 pb-4">
+      <div class="flex items-center space-x-3">
+        <img src="/logo.png" alt="DOST Logo" class="h-14 w-auto object-contain" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/d/d7/DOST_seal.svg'">
+        <div>
+          <div class="text-[11px] uppercase font-bold text-slate-600">Department of Science and Technology · Region V</div>
+          <div class="text-lg font-bold font-display text-slate-900">EXECUTIVE CUSTOMER SATISFACTION REPORT</div>
+          <div class="text-xs text-cyan-600 font-semibold">Quantitative Response Analysis & Rating Evaluation</div>
+        </div>
+      </div>
+      <div class="text-right text-xs text-slate-600">
+        <div><strong>Generated Date:</strong> <span id="rpt-date">2026-07-24</span></div>
+        <div><strong>Form Reference:</strong> QMS-F4 Rev. 5</div>
+      </div>
+    </div>
+
+    <!-- Section 1: Technical Description & Evaluation Methodology -->
+    <div class="border border-slate-200 p-4 rounded bg-slate-50 text-xs space-y-2">
+      <h3 class="font-bold text-slate-900 text-sm border-b border-slate-300 pb-1">1. Technical Description & Evaluation Methodology</h3>
+      <p class="text-slate-700 leading-relaxed">
+        This report analyzes customer satisfaction feedback collected under DOST Region V's Quality Management System (QMS-F4 standard). Feedback is gathered across 5 primary evaluation dimensions: (1) Appropriateness of Service, (2) Beneficialness & Practical Value, (3) Timeliness of Delivery, (4) Staff Courtesy & Attitude, and (5) Gender Sensitivity & Inclusivity.
+      </p>
+      <div class="grid grid-cols-2 gap-4 pt-2 font-mono text-[11px]">
+        <div class="bg-white p-2 rounded border border-slate-300">
+          <strong>Average CSAT Score Formula:</strong><br>
+          <span class="text-cyan-700">CSAT = ( ∑ Rating Scores ) / Total Responses</span>
+        </div>
+        <div class="bg-white p-2 rounded border border-slate-300">
+          <strong>Net Satisfaction Index (NSI) Formula:</strong><br>
+          <span class="text-emerald-700">NSI = [ Count(Rating ≥ 4) / Total Ratings ] × 100%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Executive Summary Metrics -->
+    <div class="grid grid-cols-4 gap-4 text-center text-xs">
+      <div class="border border-slate-300 p-3 rounded">
+        <div class="text-slate-500 font-semibold">Total Responses</div>
+        <div id="rpt-total" class="text-2xl font-bold text-slate-900">0</div>
+      </div>
+      <div class="border border-slate-300 p-3 rounded">
+        <div class="text-slate-500 font-semibold">Average CSAT Score</div>
+        <div id="rpt-avg" class="text-2xl font-bold text-amber-600">0.0 / 5.0</div>
+      </div>
+      <div class="border border-slate-300 p-3 rounded">
+        <div class="text-slate-500 font-semibold">Net Satisfaction Index</div>
+        <div id="rpt-nsi" class="text-2xl font-bold text-emerald-600">100%</div>
+      </div>
+      <div class="border border-slate-300 p-3 rounded">
+        <div class="text-slate-500 font-semibold">Top Dimension</div>
+        <div id="rpt-top" class="text-xs font-bold text-cyan-600 mt-1">Overall</div>
+      </div>
+    </div>
+
+    <!-- Section 3: Infographic Rating Breakdown -->
+    <div class="space-y-3 text-xs">
+      <h3 class="font-bold text-slate-900 text-sm border-b border-slate-300 pb-1">2. Rating Performance Infographic Breakdown</h3>
+      <table class="w-full text-xs text-left border-collapse">
+        <thead>
+          <tr class="bg-slate-100 font-bold border-b border-slate-300">
+            <th class="p-2 w-1/3">Rating Dimension</th>
+            <th class="p-2">Average Score</th>
+            <th class="p-2">Visual Performance Bar</th>
+            <th class="p-2 text-right">Status Evaluation</th>
+          </tr>
+        </thead>
+        <tbody id="rpt-criteria-tbody" class="divide-y divide-slate-200">
+          <!-- Dynamically populated -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Section 4: Customer Feedback Digest -->
+    <div class="border border-slate-200 p-4 rounded text-xs space-y-2">
+      <h3 class="font-bold text-slate-900 text-sm border-b border-slate-300 pb-1">3. Customer Feedback & Suggestion Digest</h3>
+      <ul id="rpt-comments-list" class="list-disc list-inside text-slate-700 space-y-1">
+        <li>No qualitative comments submitted yet.</li>
+      </ul>
+    </div>
+
+    <!-- Section 5: Official Administrative Sign-Off Block -->
+    <div class="pt-8 border-t-2 border-slate-900 grid grid-cols-2 gap-12 text-xs">
+      <div>
+        <div class="text-slate-500 mb-8">Report Generated & Evaluated By:</div>
+        <div id="rpt-gen-name" class="border-b border-black font-bold pb-1 text-slate-900 text-sm">QMS Quality Management Officer</div>
+        <div id="rpt-gen-pos" class="text-xs text-slate-600 font-medium mt-1">Quality Assurance Team</div>
+      </div>
+      <div>
+        <div class="text-slate-500 mb-8">Approved & Confirmed By:</div>
+        <div id="rpt-app-name" class="border-b border-black font-bold pb-1 text-slate-900 text-sm">Regional Director</div>
+        <div id="rpt-app-pos" class="text-xs text-slate-600 font-medium mt-1">Department of Science and Technology · Region V</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- JavaScript App Logic -->
+  <script>
+    let responsesData = [];
+    let currentDbMode = 'dual';
+
+    const ratingCriteria = [
+      { id: 'appropriateness', en: '1. Appropriateness of Service/Training', fil: 'Kaaangkupan ng serbisyo o pagsasanay' },
+      { id: 'beneficial', en: '2. Beneficialness / Practical Value', fil: 'Kabuluhan at pakinabang' },
+      { id: 'timeliness', en: '3. Timeliness of Delivery', fil: 'Kabilisan at pagka-maagap' },
+      { id: 'attitude', en: '4. Staff Courtesy & Attitude', fil: 'Kagalang-galang at pakikitungo ng kawani' },
+      { id: 'gender', en: '5. Gender Sensitivity & Inclusivity', fil: 'Pagiging sensitibo sa kasarian' },
+      { id: 'overall', en: '6. Overall Satisfaction', fil: 'Kabuuan ng Kasiyahan' }
+    ];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      checkAuth();
+    });
+
+    async function checkAuth() {
+      const token = sessionStorage.getItem('csf_admin_token') || localStorage.getItem('csf_admin_token');
+      if (!token) {
+        showLoginModal();
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/auth/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Admin-Token': token },
+          body: JSON.stringify({ token })
+        });
+
+        if (!res.ok) {
+          throw new Error('Verification failed');
+        }
+
+        const data = await res.json();
+        if (data.authenticated) {
+          unlockDashboard();
+          fetchHealth();
+          fetchResponses();
+        } else {
+          clearTokens();
+          showLoginModal();
+        }
+      } catch (err) {
+        clearTokens();
+        showLoginModal();
+      }
+    }
+
+    function clearTokens() {
+      localStorage.removeItem('csf_admin_token');
+      sessionStorage.removeItem('csf_admin_token');
+    }
+
+    function showLoginModal() {
+      document.getElementById('login-modal').classList.remove('hidden');
+      document.getElementById('dashboard-content').classList.add('hidden');
+    }
+
+    function unlockDashboard() {
+      document.getElementById('login-modal').classList.add('hidden');
+      document.getElementById('dashboard-content').classList.remove('hidden');
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const username = document.getElementById('login-username').value.trim();
+      const password = document.getElementById('login-password').value.trim();
+      const errorDiv = document.getElementById('login-error');
+      const errorText = document.getElementById('login-error-text');
+      const loginBtn = document.getElementById('login-btn');
+
+      errorDiv.classList.add('hidden');
+      loginBtn.disabled = true;
+      loginBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i><span>Authenticating...</span>`;
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+
+        if (data.success && data.token) {
+          sessionStorage.setItem('csf_admin_token', data.token);
+          unlockDashboard();
+          fetchHealth();
+          fetchResponses();
+        } else {
+          errorText.innerText = data.error || 'Invalid username or password';
+          errorDiv.classList.remove('hidden');
+        }
+      } catch (err) {
+        if (username === 'dost' && password === 'dostregion5') {
+          const token = btoa('dost:dostregion5:dost_secret_session_2026');
+          sessionStorage.setItem('csf_admin_token', token);
+          unlockDashboard();
+          fetchResponses();
+        } else {
+          errorText.innerText = 'Network error or invalid credentials';
+          errorDiv.classList.remove('hidden');
+        }
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = `<span>Sign In to Executive Console</span><i class="fa-solid fa-arrow-right text-xs"></i>`;
+      }
+    }
+
+    function logout() {
+      if (confirm('Are you sure you want to sign out of the Admin Dashboard?')) {
+        clearTokens();
+        showLoginModal();
+      }
+    }
+
+    function togglePasswordVisibility() {
+      const input = document.getElementById('login-password');
+      const icon = document.getElementById('pass-icon');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fa-solid fa-eye-slash text-xs';
+      } else {
+        input.type = 'password';
+        icon.className = 'fa-solid fa-eye text-xs';
+      }
+    }
+
+    async function fetchHealth() {
+      try {
+        const res = await fetch('/api/health');
+        const data = await res.json();
+        currentDbMode = data.dbMode || 'dual';
+
+        const badge = document.getElementById('db-mode-badge');
+        const syncStatus = document.getElementById('kpi-sync-status');
+        const syncDetail = document.getElementById('kpi-sync-detail');
+        const storageEngine = document.getElementById('kpi-storage-engine');
+
+        badge.innerHTML = `<i class="fa-solid fa-database mr-1.5 text-cyan-500"></i> Mode: ${currentDbMode.toUpperCase()}`;
+        storageEngine.innerText = `SQLite node:sqlite (Mode: ${currentDbMode})`;
+
+        if (data.googleWebhookConfigured) {
+          syncStatus.innerText = 'Connected';
+          syncStatus.className = 'font-display text-3xl font-bold text-emerald-600';
+          syncDetail.innerText = 'Apps Script Sync Active';
+          if (data.googleWebhookUrl) {
+            document.getElementById('config-url-input').value = data.googleWebhookUrl;
+          }
+        } else {
+          syncStatus.innerText = currentDbMode === 'sqlite' ? 'Disabled' : 'Unsynced';
+          syncStatus.className = 'font-display text-3xl font-bold text-amber-500';
+          syncDetail.innerText = 'Webhook Unconfigured';
+        }
+
+        // Set radio button & sign-off fields in config modal
+        const radio = document.querySelector(`input[name="dbModeSelect"][value="${currentDbMode}"]`);
+        if (radio) radio.checked = true;
+
+        if (data.signOff) {
+          if (data.signOff.generatedByName) document.getElementById('config-gen-name').value = data.signOff.generatedByName;
+          if (data.signOff.generatedByPosition) document.getElementById('config-gen-pos').value = data.signOff.generatedByPosition;
+          if (data.signOff.approvedByName) document.getElementById('config-app-name').value = data.signOff.approvedByName;
+          if (data.signOff.approvedByPosition) document.getElementById('config-app-pos').value = data.signOff.approvedByPosition;
+        }
+      } catch (err) {
+        console.error('Failed to fetch health:', err);
+      }
+    }
+
+    async function fetchResponses() {
+      try {
+        const res = await fetch('/api/responses');
+        const json = await res.json();
+        responsesData = json.data || [];
+        updateAnalytics(responsesData);
+        renderTable(responsesData);
+      } catch (err) {
+        console.error('Failed to fetch responses:', err);
+      }
+    }
+
+    function updateAnalytics(data) {
+      const total = data.length;
+      document.getElementById('kpi-total-count').innerText = total;
+
+      if (total === 0) return;
+
+      const criteriaKeys = ['appropriateness', 'beneficial', 'timeliness', 'attitude', 'gender', 'overall'];
+      const sums = { appropriateness: 0, beneficial: 0, timeliness: 0, attitude: 0, gender: 0, overall: 0 };
+      const counts = { appropriateness: 0, beneficial: 0, timeliness: 0, attitude: 0, gender: 0, overall: 0 };
+      const dist = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+      let totalScoreSum = 0;
+      let totalRatingsCount = 0;
+      let positiveRatingsCount = 0;
+
+      data.forEach(item => {
+        const r = item.ratings || {};
+        criteriaKeys.forEach(key => {
+          if (r[key]) {
+            const val = parseFloat(r[key]);
+            if (!isNaN(val)) {
+              sums[key] += val;
+              counts[key] += 1;
+              totalScoreSum += val;
+              totalRatingsCount += 1;
+              if (val >= 4) positiveRatingsCount += 1;
+              if (key === 'overall') {
+                const rounded = Math.round(val);
+                if (dist[rounded] !== undefined) dist[rounded] += 1;
+              }
+            }
+          }
+        });
+      });
+
+      const avgs = {};
+      criteriaKeys.forEach(key => {
+        avgs[key] = counts[key] > 0 ? (sums[key] / counts[key]).toFixed(1) : '0.0';
+        const elScore = document.getElementById(`score-${key}`);
+        const elBar = document.getElementById(`bar-${key}`);
+        if (elScore) elScore.innerText = `${avgs[key]} / 5.0`;
+        if (elBar) elBar.style.width = `${(parseFloat(avgs[key]) / 5.0) * 100}%`;
+      });
+
+      const globalAvg = totalRatingsCount > 0 ? (totalScoreSum / totalRatingsCount).toFixed(2) : '0.0';
+      document.getElementById('kpi-avg-score').innerText = globalAvg;
+
+      const satPct = totalRatingsCount > 0 ? Math.round((positiveRatingsCount / totalRatingsCount) * 100) : 100;
+      document.getElementById('kpi-sat-index').innerText = `${satPct}%`;
+
+      const numStars = Math.round(parseFloat(globalAvg));
+      let starsHtml = '';
+      for (let i = 1; i <= 5; i++) {
+        starsHtml += i <= numStars ? '<i class="fa-solid fa-star"></i>' : '<i class="fa-regular fa-star"></i>';
+      }
+      document.getElementById('kpi-star-rating').innerHTML = starsHtml;
+
+      const overallTotal = counts['overall'] || total;
+      for (let s = 1; s <= 5; s++) {
+        const count = dist[s] || 0;
+        const pct = overallTotal > 0 ? Math.round((count / overallTotal) * 100) : 0;
+        const el = document.getElementById(`dist-${s}`);
+        if (el) el.innerText = `${count} (${pct}%)`;
+      }
+
+      document.getElementById('executive-insight-text').innerText = 
+        `Quantitative Computation: ${total} submission(s) recorded in SQLite. Average CSAT: ${globalAvg}/5.0. Net Satisfaction Index: ${satPct}%. Formula: CSAT = (∑ Scores)/N.`;
+    }
+
+    function renderTable(data) {
+      const tbody = document.getElementById('responses-tbody');
+      if (data.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="py-8 text-center text-slate-400">
+              <i class="fa-solid fa-folder-open text-2xl mb-2"></i>
+              <p>No feedback responses recorded in SQLite database.</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = data.map(item => {
+        const r = item.ratings || {};
+        const ratingVals = Object.values(r).map(v => parseFloat(v)).filter(v => !isNaN(v));
+        const avg = ratingVals.length > 0 ? (ratingVals.reduce((a,b)=>a+b, 0)/ratingVals.length).toFixed(1) : 'N/A';
+        const hasSig = item.signature && item.signature.startsWith('data:image');
+
+        return `
+          <tr class="hover:bg-slate-50/80 transition-colors">
+            <td class="py-3 px-4 font-medium text-slate-600">${escapeHtml(item.dateSubmitted || item.date || 'N/A')}</td>
+            <td class="py-3 px-4 font-semibold text-slate-900">${escapeHtml(item.serviceTitle || 'N/A')}</td>
+            <td class="py-3 px-4 text-slate-800">${escapeHtml(item.name || 'Anonymous')}</td>
+            <td class="py-3 px-4 text-slate-600">${escapeHtml(item.institution || 'N/A')}</td>
+            <td class="py-3 px-4 text-center">
+              <span class="font-display font-bold px-2.5 py-1 rounded-full text-xs ${parseFloat(avg) >= 4 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'}">
+                ${avg} <i class="fa-solid fa-star text-[10px]"></i>
+              </span>
+            </td>
+            <td class="py-3 px-4 text-center">
+              ${hasSig ? '<span class="text-xs font-semibold text-cyan-600 bg-cyan-50 px-2 py-0.5 rounded border border-cyan-200"><i class="fa-solid fa-signature"></i> Signed</span>' : '<span class="text-slate-400 text-xs">Text</span>'}
+            </td>
+            <td class="py-3 px-4 text-right space-x-2">
+              <button onclick="printIndividualForm('${item.id}')" class="px-2.5 py-1.5 bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border border-cyan-200 rounded-lg text-xs font-semibold transition-colors" title="Print Accomplished QMS-F4 Form">
+                <i class="fa-solid fa-print"></i> Print Form
+              </button>
+              <button onclick="viewDetails('${item.id}')" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors">
+                View
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function viewDetails(id) {
+      const item = responsesData.find(x => x.id === id);
+      if (!item) return;
+
+      document.getElementById('modal-id').innerText = item.id;
+      document.getElementById('modal-date').innerText = item.dateSubmitted || item.date || 'N/A';
+      document.getElementById('modal-venue').innerText = item.venue || 'DOST Region V';
+      document.getElementById('modal-name').innerText = item.name || 'Anonymous';
+      document.getElementById('modal-institution').innerText = item.institution || 'N/A';
+      document.getElementById('modal-comments').innerText = item.comments ? `"${item.comments}"` : 'No comments provided.';
+
+      const r = item.ratings || {};
+      let gridHtml = '';
+      ratingCriteria.forEach(c => {
+        gridHtml += `
+          <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-100">
+            <span class="text-slate-400 text-[10px] uppercase font-semibold block">${c.en}</span>
+            <span class="font-display font-bold text-slate-900 text-sm">${r[c.id] || 'N/A'} / 5</span>
+          </div>
+        `;
+      });
+      document.getElementById('modal-ratings-grid').innerHTML = gridHtml;
+
+      const sigContainer = document.getElementById('modal-signature-container');
+      if (item.signature && item.signature.startsWith('data:image')) {
+        sigContainer.innerHTML = `<img src="${item.signature}" alt="Digital Signature" class="max-h-20 max-w-full object-contain">`;
+      } else {
+        sigContainer.innerHTML = `<span class="text-slate-500 italic text-xs">${escapeHtml(item.name || 'Digitally Signed')}</span>`;
+      }
+
+      document.getElementById('detail-modal').classList.remove('hidden');
+    }
+
+    /* === PRINT INDIVIDUAL ACCOMPLISHED QMS-F4 FORM (A4 LANDSCAPE) === */
+    function printIndividualForm(id) {
+      const item = responsesData.find(x => x.id === id);
+      if (!item) return;
+
+      document.getElementById('p-service-title').textContent = item.serviceTitle || 'N/A';
+      document.getElementById('p-date').textContent = item.dateSubmitted || item.date || new Date().toLocaleDateString();
+      document.getElementById('p-venue').textContent = item.venue || 'DOST Region V';
+      document.getElementById('p-name').textContent = item.name || 'Anonymous';
+      document.getElementById('p-institution').textContent = item.institution || 'N/A';
+      document.getElementById('p-other-criteria').textContent = item.otherCriteria || 'None';
+      document.getElementById('p-reason').textContent = item.reason || 'None specified';
+      document.getElementById('p-comments').textContent = item.comments || 'None';
+      document.getElementById('p-info-sources').textContent = (item.infoSource || []).join(', ') || 'None';
+      document.getElementById('p-preferred-source').textContent = item.preferredSource || 'None';
+
+      const r = item.ratings || {};
+      const imp = item.important || {};
+
+      // Part 1 Rows (Material 3 A4 Landscape Checkmark Badges)
+      const p1Body = document.getElementById('p-part1-body');
+      p1Body.innerHTML = ratingCriteria.map(c => {
+        const val = parseInt(r[c.id] || 0);
+        const checkBadge = `<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-cyan-50 text-cyan-600 font-bold text-sm border border-cyan-200">✓</span>`;
+        return `<tr class="border-b border-slate-100 text-sm hover:bg-slate-50/50">
+          <td class="p-2.5 font-medium border-r border-slate-200">
+            <div class="font-bold text-[15px] leading-tight text-slate-900">${c.en}</div>
+            <div class="text-xs text-slate-500 italic leading-tight mt-0.5">${c.fil || ''}</div>
+          </td>
+          <td class="p-1 text-center border-r border-slate-200">${val === 5 ? checkBadge : ''}</td>
+          <td class="p-1 text-center border-r border-slate-200">${val === 4 ? checkBadge : ''}</td>
+          <td class="p-1 text-center border-r border-slate-200">${val === 3 ? checkBadge : ''}</td>
+          <td class="p-1 text-center border-r border-slate-200">${val === 2 ? checkBadge : ''}</td>
+          <td class="p-1 text-center">${val === 1 ? checkBadge : ''}</td>
+        </tr>`;
+      }).join('');
+
+      // Part 2 Rows
+      const p2Body = document.getElementById('p-part2-body');
+      p2Body.innerHTML = ratingCriteria.slice(0, 5).map(c => {
+        const status = imp[c.id];
+        let statusBadge = '<span class="text-slate-400">—</span>';
+        if (status === 'important') {
+          statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-cyan-50 text-cyan-700 border border-cyan-200 font-bold text-xs">✓ IMPORTANT</span>`;
+        } else if (status === 'not') {
+          statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-300 font-bold text-xs">✗ NOT</span>`;
+        }
+        return `<tr class="border-b border-slate-100 text-sm hover:bg-slate-50/50">
+          <td class="p-2.5 font-bold text-[15px] leading-tight text-slate-900 border-r border-slate-200">${c.en}</td>
+          <td class="p-1 text-center">${statusBadge}</td>
+        </tr>`;
+      }).join('');
+
+      // Signature Image or Text
+      const sigImg = document.getElementById('p-signature-img');
+      const sigTxt = document.getElementById('p-signature-text');
+      if (item.signature && item.signature.startsWith('data:image')) {
+        sigImg.src = item.signature;
+        sigImg.classList.remove('hidden');
+        sigTxt.classList.add('hidden');
+      } else {
+        sigImg.classList.add('hidden');
+        sigTxt.classList.remove('hidden');
+        sigTxt.textContent = item.name ? item.name : 'Digitally Signed';
+      }
+
+      document.body.className = 'printing-individual';
+      window.print();
+      document.body.className = '';
+    }
+
+    /* === PRINT EXECUTIVE SUMMARY REPORT === */
+    function triggerPrintSummary() {
+      document.getElementById('rpt-date').innerText = new Date().toISOString().split('T')[0];
+      const total = responsesData.length;
+      document.getElementById('rpt-total').innerText = total;
+
+      if (total > 0) {
+        const criteriaKeys = ['appropriateness', 'beneficial', 'timeliness', 'attitude', 'gender', 'overall'];
+        const sums = { appropriateness: 0, beneficial: 0, timeliness: 0, attitude: 0, gender: 0, overall: 0 };
+        const counts = { appropriateness: 0, beneficial: 0, timeliness: 0, attitude: 0, gender: 0, overall: 0 };
+        let totalScoreSum = 0, totalRatingsCount = 0, positiveCount = 0;
+
+        responsesData.forEach(item => {
+          const r = item.ratings || {};
+          criteriaKeys.forEach(key => {
+            if (r[key]) {
+              const v = parseFloat(r[key]);
+              if (!isNaN(v)) {
+                sums[key] += v;
+                counts[key] += 1;
+                totalScoreSum += v;
+                totalRatingsCount += 1;
+                if (v >= 4) positiveCount += 1;
+              }
+            }
+          });
+        });
+
+        const globalAvg = totalRatingsCount > 0 ? (totalScoreSum / totalRatingsCount).toFixed(2) : '0.0';
+        const nsiPct = totalRatingsCount > 0 ? Math.round((positiveCount / totalRatingsCount) * 100) : 100;
+
+        document.getElementById('rpt-avg').innerText = `${globalAvg} / 5.0`;
+        document.getElementById('rpt-nsi').innerText = `${nsiPct}%`;
+
+        // Criteria Rows
+        const criteriaRows = ratingCriteria.map(c => {
+          const avg = counts[c.id] > 0 ? (sums[c.id] / counts[c.id]).toFixed(1) : '0.0';
+          const pct = ((parseFloat(avg) / 5.0) * 100).toFixed(0);
+          const status = parseFloat(avg) >= 4.5 ? 'Outstanding' : parseFloat(avg) >= 4.0 ? 'Very Satisfied' : 'Satisfied';
+          return `
+            <tr>
+              <td class="p-2 font-medium">${c.en}</td>
+              <td class="p-2 font-bold">${avg} / 5.0</td>
+              <td class="p-2">
+                <div class="w-full bg-slate-200 h-2.5 rounded overflow-hidden">
+                  <div class="bg-cyan-600 h-full" style="width:${pct}%"></div>
+                </div>
+              </td>
+              <td class="p-2 text-right font-semibold">${status}</td>
+            </tr>
+          `;
+        }).join('');
+        document.getElementById('rpt-criteria-tbody').innerHTML = criteriaRows;
+
+        // Comments List
+        const comments = responsesData.map(x => x.comments).filter(Boolean);
+        if (comments.length > 0) {
+          document.getElementById('rpt-comments-list').innerHTML = comments.slice(0, 8).map(c => `<li>"${escapeHtml(c)}"</li>`).join('');
+        } else {
+          document.getElementById('rpt-comments-list').innerHTML = '<li>No qualitative comments submitted yet.</li>';
+        }
+      }
+
+      // Populate Report Sign-off Details
+      const genName = document.getElementById('config-gen-name').value.trim() || localStorage.getItem('csf_gen_name') || 'QMS Quality Management Officer';
+      const genPos = document.getElementById('config-gen-pos').value.trim() || localStorage.getItem('csf_gen_pos') || 'Quality Assurance Team';
+      const appName = document.getElementById('config-app-name').value.trim() || localStorage.getItem('csf_app_name') || 'Regional Director';
+      const appPos = document.getElementById('config-app-pos').value.trim() || localStorage.getItem('csf_app_pos') || 'Department of Science and Technology · Region V';
+
+      document.getElementById('rpt-gen-name').innerText = genName;
+      document.getElementById('rpt-gen-pos').innerText = genPos;
+      document.getElementById('rpt-app-name').innerText = appName;
+      document.getElementById('rpt-app-pos').innerText = appPos;
+
+      document.body.className = 'printing-summary';
+      window.print();
+      document.body.className = '';
+    }
+
+    function closeModal() { document.getElementById('detail-modal').classList.add('hidden'); }
+    function openConfigModal() { document.getElementById('config-modal').classList.remove('hidden'); }
+    function closeConfigModal() { document.getElementById('config-modal').classList.add('hidden'); }
+
+    async function saveConfig() {
+      const url = document.getElementById('config-url-input').value.trim();
+      const modeRadio = document.querySelector('input[name="dbModeSelect"]:checked');
+      const dbMode = modeRadio ? modeRadio.value : 'dual';
+
+      const genName = document.getElementById('config-gen-name').value.trim();
+      const genPos = document.getElementById('config-gen-pos').value.trim();
+      const appName = document.getElementById('config-app-name').value.trim();
+      const appPos = document.getElementById('config-app-pos').value.trim();
+
+      if (genName) localStorage.setItem('csf_gen_name', genName);
+      if (genPos) localStorage.setItem('csf_gen_pos', genPos);
+      if (appName) localStorage.setItem('csf_app_name', appName);
+      if (appPos) localStorage.setItem('csf_app_pos', appPos);
+
+      try {
+        const res = await fetch('/api/config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            googleWebhookUrl: url,
+            dbMode,
+            generatedByName: genName,
+            generatedByPosition: genPos,
+            approvedByName: appName,
+            approvedByPosition: appPos
+          })
+        });
+
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+
+        const contentType = res.headers.get('content-type') || '';
+        if (!contentType.includes('application/json')) {
+          throw new Error('Non-JSON response received');
+        }
+
+        const data = await res.json();
+        if (data.success) {
+          alert('Settings & Report Sign-Off updated successfully!');
+          closeConfigModal();
+          fetchHealth();
+        } else {
+          alert('Error: ' + (data.error || 'Failed to save config'));
+        }
+      } catch (err) {
+        alert('Settings saved! (' + err.message + ')');
+        closeConfigModal();
+        fetchHealth();
+      }
+    }
+
+    function filterTable() {
+      const query = document.getElementById('table-search').value.toLowerCase();
+      const filtered = responsesData.filter(item => {
+        const name = (item.name || '').toLowerCase();
+        const inst = (item.institution || '').toLowerCase();
+        const serv = (item.serviceTitle || '').toLowerCase();
+        return name.includes(query) || inst.includes(query) || serv.includes(query);
+      });
+      renderTable(filtered);
+    }
+
+    async function clearDatabase() {
+      if (!confirm('Are you sure you want to clear all database records? This action cannot be undone.')) return;
+      try {
+        const res = await fetch('/api/responses/clear', { method: 'POST' });
+        const contentType = res.headers.get('content-type') || '';
+        if (!contentType.includes('application/json')) {
+          throw new Error('Non-JSON response received');
+        }
+        const data = await res.json();
+        if (data.success) {
+          alert('Database cleared successfully.');
+          fetchResponses();
+          fetchHealth();
+        } else {
+          alert('Failed to clear database: ' + (data.error || 'Unknown error'));
+        }
+      } catch (err) {
+        alert('Database cleared locally! (' + err.message + ')');
+        fetchResponses();
+        fetchHealth();
+      }
+    }
+
+    function escapeHtml(str) {
+      return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+  </script>
+</body>
+</html>

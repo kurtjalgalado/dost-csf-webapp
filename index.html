@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customer Satisfaction Feedback · DOST Region V</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  :root {
+    --bg: #FFFFFF;
+    --ink: #000000;
+    --muted: #6B7280;
+    --line: #E5E7EB;
+    --accent: #00aeef;
+    --accent-dark: #0099D5;
+    --accent-soft: rgba(0, 174, 239, 0.08);
+    --soft: #F7F8FA;
+  }
+  * { -webkit-font-smoothing: antialiased; box-sizing: border-box; }
+  body {
+    font-family: 'Gotham', 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    background-image: radial-gradient(circle, rgba(0, 0, 0, 0.025) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  .font-display { font-family: 'Gotham', 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif; }
+
+  /* === Animated Rating System === */
+  .spark-group { display: flex; gap: 6px; items-center; justify-content: flex-start; }
+  .spark-btn {
+    background: none; border: none; padding: 4px; cursor: pointer; 
+    display: flex; align-items: center; justify-content: center;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .spark-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+  .spark-svg { width: 32px; height: 32px; transition: transform 0.2s ease; }
+  @media (min-width: 640px) {
+    .spark-svg { width: 40px; height: 40px; }
+    .spark-group { gap: 8px; }
+  }
+  .spark-btn:hover .spark-svg { transform: translateY(-3px); }
+  
+  .spark-path {
+    fill: none;
+    stroke: var(--line);
+    stroke-width: 8;
+    stroke-linejoin: round;
+    transition: fill 0.2s ease, stroke 0.2s ease;
+  }
+  .spark-btn:hover .spark-path { stroke: var(--accent); }
+  
+  .spark-path.filled { fill: var(--accent); stroke: var(--accent); }
+  .spark-path.filled-low { fill: var(--ink); stroke: var(--ink); }
+
+  .spark-btn.animate-pop .spark-svg {
+    animation: pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  @keyframes pop {
+    0% { transform: scale(1) rotate(0deg); }
+    50% { transform: scale(1.4) rotate(-12deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+
+  /* Toggle */
+  .toggle-btn { transition: all 0.2s ease; cursor: pointer; background: white; border: 2px solid var(--line); -webkit-tap-highlight-color: transparent; }
+  .toggle-btn:hover:not(.active-important):not(.active-not) { border-color: var(--accent); }
+  .toggle-btn.active-important { background: var(--accent); color: white; border-color: var(--accent); }
+  .toggle-btn.active-not { background: var(--ink); color: white; border-color: var(--ink); }
+
+  .step-content { animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .progress-fill { transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+  .step-dot { transition: all 0.3s ease; }
+
+  .float-input { transition: all 0.2s ease; background: var(--soft); border: 2px solid var(--line); font-size: 16px; }
+  @media (min-width: 640px) {
+    .float-input { font-size: 15px; }
+  }
+  .float-input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(0, 174, 239, 0.1); outline: none; background: white; }
+
+  .source-card { transition: all 0.2s ease; cursor: pointer; background: white; border: 2px solid var(--line); -webkit-tap-highlight-color: transparent; }
+  .source-card:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .source-card.checked { border-color: var(--accent); background: var(--accent-soft); }
+  .source-card.checked .check-icon { background: var(--accent); border-color: var(--accent); color: white; }
+  .source-card.checked-single { border-color: var(--accent); background: var(--accent-soft); }
+  .source-card.checked-single .radio-dot { border-color: var(--accent); }
+  .source-card.checked-single .radio-dot::after { opacity: 1; transform: scale(1); }
+  .radio-dot::after { content: ''; position: absolute; inset: 4px; background: var(--accent); border-radius: 50%; opacity: 0; transform: scale(0); transition: all 0.2s ease; }
+
+  .btn-primary { transition: all 0.2s ease; background: var(--ink); color: white; -webkit-tap-highlight-color: transparent; }
+  .btn-primary:hover { background: var(--accent); transform: translateY(-1px); box-shadow: 0 8px 20px rgba(0, 174, 239, 0.3); }
+  .btn-primary:active { transform: translateY(0); }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  @keyframes checkmark { 0% { transform: scale(0) rotate(-30deg); opacity: 0; } 60% { transform: scale(1.15) rotate(0deg); } 100% { transform: scale(1) rotate(0deg); opacity: 1; } }
+  .checkmark-anim { animation: checkmark 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+  @keyframes drawCircle { to { stroke-dashoffset: 0; } }
+  .circle-draw { stroke-dasharray: 283; stroke-dashoffset: 283; animation: drawCircle 0.8s ease-out forwards; }
+
+  .toast { animation: toastIn 0.35s ease forwards; }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  .accent-line { display: inline-block; width: 32px; height: 3px; background: var(--accent); margin-right: 12px; vertical-align: middle; }
+  .logo-img { transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+  .logo-img:hover { transform: scale(1.05); }
+  .summary-row:hover { background: var(--soft); }
+
+  /* Digital Signature Canvas Styles */
+  .sig-canvas-container {
+    touch-action: none !important;
+    user-select: none;
+    -webkit-user-select: none;
+    border: 2px dashed #CBD5E1;
+    background: #F8FAFC;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+  .sig-canvas-container:focus-within {
+    border-color: var(--accent);
+    background: #FFFFFF;
+  }
+
+  /* === Print Styles for Official QMS-F4 Document (Full A4 Landscape Fill) === */
+  @page {
+    size: A4 landscape;
+    margin: 8mm 10mm;
+  }
+  @media print {
+    html, body {
+      background: white !important;
+      background-image: none !important;
+      color: black !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      font-size: 13px !important;
+    }
+    .no-print, header, footer, #toast-container, main, div.h-1 { display: none !important; }
+    #interactive-app { display: none !important; }
+    #printable-document {
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: space-between !important;
+      visibility: visible !important;
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 98% !important;
+      max-width: 100% !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      border: none !important;
+      box-shadow: none !important;
+      page-break-after: avoid !important;
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+    }
+  }
+  @media screen {
+    #printable-document { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="interactive-app">
+  <div class="h-1 bg-[var(--accent)]"></div>
+
+  <div class="relative max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <header class="mb-6 sm:mb-12">
+      <div class="flex items-center justify-between mb-6 sm:mb-10 gap-4">
+        <div class="flex items-center gap-3 sm:gap-4">
+          <div class="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center flex-shrink-0">
+            <img src="logo.png" alt="DOST Logo" class="logo-img max-w-full max-h-full object-contain">
+          </div>
+          <div>
+            <div class="text-[10px] sm:text-[11px] uppercase tracking-[0.18em] sm:tracking-[0.2em] text-[var(--muted)] font-bold">DOST Regional Office No. V</div>
+            <div class="text-sm sm:text-base font-bold font-display text-[var(--ink)]">Quality Management System</div>
+          </div>
+        </div>
+        <div class="hidden sm:flex items-center space-x-4">
+          <div class="text-right">
+            <div class="text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">Form Reference</div>
+            <div class="text-sm font-mono font-medium">QMS-F4 · Rev. 5 · 01.09.26</div>
+          </div>
+          <a href="/admin.html" class="px-3 py-1.5 bg-[var(--ink)] hover:bg-[var(--accent)] text-white rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm">
+            <i class="fa-solid fa-chart-pie"></i> Admin
+          </a>
+        </div>
+      </div>
+
+      <div class="border-t-2 border-[var(--ink)] pt-6 sm:pt-8">
+        <div class="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-[var(--accent)] font-bold mb-3 sm:mb-4 flex items-center">
+          <span class="accent-line"></span>Customer Satisfaction Feedback
+        </div>
+        <h1 class="font-display text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight text-[var(--ink)]">
+          Help us <span class="text-[var(--accent)]">serve you</span> <br class="hidden sm:inline">better.
+        </h1>
+        <p class="mt-3 sm:mt-5 text-[var(--muted)] max-w-2xl text-xs sm:text-[15px] leading-relaxed">
+          Please take a minute to fill up this form.
+          <span class="italic text-[var(--ink)]/70 block sm:inline mt-1 sm:mt-0">Kung inyong mararapating tulungan kami upang maging mas mahusay namin kayong mapaglingkuran, sa pamamagitan ng pagsagot ng form na ito.</span>
+        </p>
+      </div>
+    </header>
+
+    <div class="mb-6">
+      <div class="flex items-center justify-between mb-3">
+        <div class="text-[10px] uppercase tracking-[0.2em] text-[var(--muted)] font-bold">Your Progress</div>
+        <div class="text-xs text-[var(--muted)]"><span id="progress-text" class="font-bold text-[var(--ink)]">1</span> of 6</div>
+      </div>
+      <div class="h-1 bg-[var(--line)] rounded-full overflow-hidden">
+        <div id="progress-bar" class="progress-fill h-full bg-[var(--accent)] rounded-full" style="width: 16.67%"></div>
+      </div>
+      <div class="flex items-center justify-between mt-5 overflow-x-auto gap-1" id="step-dots"></div>
+    </div>
+
+    <main class="bg-white rounded-2xl border-2 border-[var(--ink)] overflow-hidden" style="box-shadow: 6px 6px 0 0 rgba(0, 174, 239, 0.12);">
+      <div id="step-container" class="min-h-[460px]"></div>
+
+      <div class="px-6 sm:px-10 py-5 border-t-2 border-[var(--ink)] bg-[var(--soft)] flex items-center justify-between gap-4">
+        <button id="prev-btn" class="text-sm font-medium text-[var(--muted)] hover:text-[var(--ink)] transition-colors flex items-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed" disabled>
+          <i class="fa-solid fa-arrow-left text-xs"></i> Back
+        </button>
+        <div class="text-xs text-[var(--muted)] hidden sm:flex items-center gap-1.5">
+          <i class="fa-solid fa-lock text-[10px]"></i> Responses are confidential
+        </div>
+        <button id="next-btn" class="btn-primary text-sm font-semibold px-6 py-3 rounded-xl flex items-center gap-2">
+          Continue <i class="fa-solid fa-arrow-right text-xs"></i>
+        </button>
+      </div>
+    </main>
+
+    <footer class="mt-6 sm:mt-8 pt-4 border-t border-[var(--line)]/50 flex flex-col sm:flex-row items-center justify-between text-xs text-[var(--muted)] gap-3 text-center sm:text-left">
+      <div class="font-medium text-[11px] sm:text-xs space-y-0.5">
+        <div>Department of Science and Technology · Region V · Bicol</div>
+        <div class="sm:hidden text-[10px] font-mono text-[var(--muted)]">Form Reference: QMS-F4 · Rev. 5 · 01.09.26</div>
+      </div>
+      <div class="flex items-center gap-2 bg-[var(--soft)] px-3 py-1.5 rounded-full border border-[var(--line)]">
+        <span class="w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse"></span>
+        <span class="font-semibold text-[11px] text-[var(--ink)]">Digital Feedback System</span>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<!-- PRINTABLE OFFICIAL QMS-F4 DOCUMENT (MATERIAL 3 DESIGN) -->
+<div id="printable-document" class="p-6 text-slate-900 text-sm leading-relaxed font-sans max-w-none mx-auto bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-3">
+  
+  <!-- HEADER CARD -->
+  <div class="flex justify-between items-center bg-slate-900 text-white rounded-2xl p-4 shadow-xs">
+    <div class="flex items-center gap-4">
+      <img src="logo.png" alt="DOST V Logo" class="w-14 h-14 object-contain bg-white rounded-xl p-1">
+      <div>
+        <div class="font-bold text-base uppercase tracking-tight text-white">Department of Science and Technology</div>
+        <div class="text-sm font-semibold text-cyan-300">Regional Office No. V · Bicol</div>
+        <div class="text-xs text-slate-300 uppercase tracking-wider font-mono">Quality Management System</div>
+      </div>
+    </div>
+    <div class="text-right border-l border-slate-700 pl-4">
+      <div class="font-bold text-base text-white tracking-wide">CUSTOMER SATISFACTION FEEDBACK</div>
+      <div class="inline-block mt-1 px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-mono text-xs font-bold border border-cyan-400/30">
+        QMS-F4 · Rev. 5 · 01.09.26
+      </div>
+    </div>
+  </div>
+
+  <!-- METADATA CARD -->
+  <div class="grid grid-cols-12 gap-3 border border-slate-200 rounded-2xl p-3 bg-slate-50 text-sm font-medium">
+    <div class="col-span-6 flex items-center"><span class="font-bold text-slate-700 mr-2">Service / Activity:</span> <span id="print-service-title" class="font-bold text-slate-900 underline"></span></div>
+    <div class="col-span-3 flex items-center"><span class="font-bold text-slate-700 mr-2">Date:</span> <span id="print-date" class="font-semibold text-slate-900"></span></div>
+    <div class="col-span-3 flex items-center"><span class="font-bold text-slate-700 mr-2">Venue:</span> <span id="print-venue" class="font-semibold text-slate-900"></span></div>
+  </div>
+
+  <div class="text-xs italic text-slate-600 font-medium px-1">
+    PLEASE HELP US SERVE YOU BETTER BY TAKING A MINUTE TO FILL UP THIS FORM <span class="text-slate-500">(Kung inyong mararapating tulungan kami upang maging mas mahusay namin kayong mapaglingkuran)</span>.
+  </div>
+
+  <!-- RATINGS & IMPORTANCE CARDS (2-COLUMN GRID) -->
+  <div class="grid grid-cols-12 gap-4 mb-1 flex-1">
+    <!-- LEFT: PART I RATINGS -->
+    <div class="col-span-7 flex flex-col border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
+      <div class="font-bold uppercase text-xs bg-slate-100 text-slate-800 px-3.5 py-2 border-b border-slate-200 flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-[var(--accent)]"></span> PART I: HOW WILL YOU RATE OUR SERVICES?
+      </div>
+      <table class="w-full border-collapse text-left text-sm flex-1">
+        <thead>
+          <tr class="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-700">
+            <th class="p-2.5 border-r border-slate-200">CRITERIA</th>
+            <th class="w-10 text-center border-r border-slate-200">5<br><span class="text-[10px] font-normal text-slate-500">Out.</span></th>
+            <th class="w-10 text-center border-r border-slate-200">4<br><span class="text-[10px] font-normal text-slate-500">V.Sat</span></th>
+            <th class="w-10 text-center border-r border-slate-200">3<br><span class="text-[10px] font-normal text-slate-500">Sat.</span></th>
+            <th class="w-10 text-center border-r border-slate-200">2<br><span class="text-[10px] font-normal text-slate-500">Fair</span></th>
+            <th class="w-10 text-center">1<br><span class="text-[10px] font-normal text-slate-500">Unsat</span></th>
+          </tr>
+        </thead>
+        <tbody id="print-part1-body"></tbody>
+      </table>
+    </div>
+
+    <!-- RIGHT: PART II IMPORTANCE -->
+    <div class="col-span-5 flex flex-col justify-between space-y-3">
+      <div class="flex-1 flex flex-col border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
+        <div class="font-bold uppercase text-xs bg-slate-100 text-slate-800 px-3.5 py-2 border-b border-slate-200 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-[var(--accent)]"></span> PART II: ATTRIBUTES IMPORTANT TO YOU
+        </div>
+        <table class="w-full border-collapse text-left text-sm flex-1">
+          <thead>
+            <tr class="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-700">
+              <th class="p-2.5 border-r border-slate-200">CRITERIA / ATTRIBUTE</th>
+              <th class="w-28 text-center">STATUS</th>
+            </tr>
+          </thead>
+          <tbody id="print-part2-body"></tbody>
+        </table>
+      </div>
+      <div class="border border-slate-200 rounded-xl p-2.5 text-xs bg-slate-50">
+        <span class="font-bold block text-slate-700 text-xs uppercase tracking-wider mb-0.5">Other criteria/attributes:</span>
+        <span id="print-other-criteria" class="italic text-slate-900 text-sm"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- REASONS & COMMENTS (SIDE BY SIDE CARDS) -->
+  <div class="grid grid-cols-2 gap-4 text-sm">
+    <div class="border border-slate-200 rounded-2xl p-3 bg-slate-50/60 min-h-[70px]">
+      <div class="font-bold text-xs uppercase tracking-wider text-slate-700 border-b border-slate-200 pb-1 mb-1 flex items-center gap-1.5">
+        <i class="fa-solid fa-circle-question text-[var(--accent)] text-[11px]"></i> Reason for scores 3, 2, 1 (if any):
+      </div>
+      <div id="print-reason" class="text-slate-900 text-sm font-medium"></div>
+    </div>
+    <div class="border border-slate-200 rounded-2xl p-3 bg-slate-50/60 min-h-[70px]">
+      <div class="font-bold text-xs uppercase tracking-wider text-slate-700 border-b border-slate-200 pb-1 mb-1 flex items-center gap-1.5">
+        <i class="fa-solid fa-comment-dots text-[var(--accent)] text-[11px]"></i> Comments / Suggestions:
+      </div>
+      <div id="print-comments" class="text-slate-900 text-sm font-medium"></div>
+    </div>
+  </div>
+
+  <!-- INFO SOURCES & SIGNATURE CARD -->
+  <div class="grid grid-cols-12 gap-3 border border-slate-200 rounded-2xl p-3 bg-slate-50 items-end shadow-xs">
+    <div class="col-span-7 text-xs space-y-1.5">
+      <div><span class="font-bold text-slate-700">Info Sources Checked:</span> <span id="print-info-sources" class="text-slate-900 text-xs font-medium"></span></div>
+      <div><span class="font-bold text-slate-700">Preferred Channel:</span> <span id="print-preferred-source" class="text-[var(--accent-dark)] font-bold text-xs"></span></div>
+    </div>
+    <div class="col-span-5 border-l border-slate-200 pl-3">
+      <div class="grid grid-cols-2 gap-2 text-xs mb-1">
+        <div><span class="font-bold block text-[10px] text-slate-500 uppercase tracking-wider">Name</span> <span id="print-name" class="font-bold text-slate-900 text-xs"></span></div>
+        <div><span class="font-bold block text-[10px] text-slate-500 uppercase tracking-wider">Institution</span> <span id="print-institution" class="font-bold text-slate-900 text-xs"></span></div>
+      </div>
+      <div class="relative pt-4 text-center">
+        <div class="h-6 flex items-center justify-center relative">
+          <img id="print-signature-img" class="h-14 max-w-full object-contain absolute bottom-0 z-10 hidden" alt="Signature">
+          <span id="print-signature-text" class="font-serif italic text-sm font-semibold text-slate-800"></span>
+        </div>
+        <div class="border-t border-slate-400 text-[10px] font-bold uppercase tracking-wider text-slate-600 pt-0.5">Digital Signature</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast-container" class="fixed bottom-6 right-6 z-50 space-y-2"></div>
+
+<script>
+const state = {
+  step: 0,
+  data: {
+    serviceTitle: '', ratings: {}, important: {}, otherCriteria: '',
+    reason: '', comments: '', signature: '', name: '', institution: '',
+    infoSource: [], preferredSource: '', othersText: '', date: '', venue: ''
+  }
+};
+
+const ratingCriteria = [
+  { id: 'appropriateness', en: 'Appropriateness of the Service/Activity', fil: 'Kaangkupan ng Serbisyo/Aktibidad' },
+  { id: 'beneficial', en: 'How beneficial is the Service/Activity', fil: 'Gaano kapaki-pakinabang ang serbisyo/aktibidad' },
+  { id: 'timeliness', en: 'Timeliness of Delivery', fil: 'Kaagapan ng serbisyo' },
+  { id: 'attitude', en: 'Attitude of Staff', fil: 'Kagandahang loob at asal ng mga kawani' },
+  { id: 'gender', en: 'Gender Fair Treatment', fil: 'Pantay pantay na pakikitungo' },
+  { id: 'overall', en: 'Over-all Satisfaction', fil: 'Pangkalahatang kasiyahan ng serbisyong naibigay' }
+];
+
+const ratingLabels = [
+  { value: 1, label: 'Unsatisfactory', fil: 'Hindi Kasiya-siya' },
+  { value: 2, label: 'Fair', fil: 'Katamtaman' },
+  { value: 3, label: 'Satisfactory', fil: 'Kasiya-siya' },
+  { value: 4, label: 'Very Satisfactory', fil: 'Napaka kasiya-siya' },
+  { value: 5, label: 'Outstanding', fil: 'Lubos na kasiya-siya' }
+];
+
+const sourceGroups = [
+  { title: 'Traditional Media', icon: 'fa-tower-broadcast', items: ['Bulletin Board/Poster', 'Newspaper', 'Radio', 'Video/TV'] },
+  { title: 'Digital / Online', icon: 'fa-globe', items: ['DOST Website', 'Email Notification', 'SMS / Text Message'] },
+  { title: 'Social / Messaging', icon: 'fa-hashtag', items: ['Facebook', 'YouTube', 'TikTok', 'Instagram', 'Messenger'] },
+  { title: 'Interpersonal / Official', icon: 'fa-users', items: ['Official Memo/Letter', 'Word of Mouth (Colleague/Friend)'] }
+];
+
+const stepNames = ['Service', 'Rating', 'Importance', 'Feedback', 'Information', 'Identity'];
+
+function $(s) { return document.querySelector(s); }
+function el(html) { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstChild; }
+
+function toast(msg, type = 'info') {
+  const colors = { info: 'bg-[var(--ink)]', warn: 'bg-[var(--ink)]', success: 'bg-[var(--accent)]' };
+  const icons = { info: 'fa-circle-info', warn: 'fa-triangle-exclamation', success: 'fa-circle-check' };
+  const t = el(`<div class="toast ${colors[type]} text-white text-sm px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 max-w-xs"><i class="fa-solid ${icons[type]}"></i>${msg}</div>`);
+  $('#toast-container').appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(10px)'; t.style.transition = 'all 0.3s'; }, 2800);
+  setTimeout(() => t.remove(), 3200);
+}
+
+function renderDots() {
+  $('#step-dots').innerHTML = stepNames.map((name, i) => {
+    const status = i < state.step ? 'done' : i === state.step ? 'current' : 'todo';
+    const dotClass = status === 'done' ? 'bg-[var(--accent)] border-[var(--accent)] text-white'
+                   : status === 'current' ? 'border-[var(--accent)] text-[var(--accent)] bg-white'
+                   : 'border-[var(--line)] text-[var(--muted)] bg-white';
+    const labelClass = status === 'current' ? 'text-[var(--ink)] font-semibold' : 'text-[var(--muted)]';
+    return `<div class="flex items-center gap-2 flex-shrink-0">
+      <div class="step-dot w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold border-2 ${dotClass}">${status === 'done' ? '<i class="fa-solid fa-check text-[9px]"></i>' : (i + 1)}</div>
+      <span class="text-xs hidden md:inline ${labelClass}">${name}</span>
+    </div>${i < stepNames.length - 1 ? '<div class="flex-1 h-px bg-[var(--line)] mx-1 min-w-[6px]"></div>' : ''}`;
+  }).join('');
+}
+
+function updateProgress() {
+  const pct = ((state.step + 1) / stepNames.length) * 100;
+  $('#progress-bar').style.width = pct + '%';
+  $('#progress-text').textContent = Math.min(state.step + 1, 6);
+  renderDots();
+  $('#prev-btn').disabled = state.step === 0;
+  $('#next-btn').innerHTML = state.step === stepNames.length - 1
+    ? 'Submit Feedback <i class="fa-solid fa-paper-plane text-xs"></i>'
+    : 'Continue <i class="fa-solid fa-arrow-right text-xs"></i>';
+}
+
+// === STEP RENDERERS ===
+
+function stepService() {
+  return `<div class="step-content px-6 sm:px-10 py-10">
+    <div class="text-[10px] uppercase tracking-[0.25em] text-[var(--accent)] font-bold mb-2"><span class="accent-line"></span>Step 1 · Service Details</div>
+    <h2 class="font-display text-3xl sm:text-4xl font-bold leading-tight mb-2">What service did you receive?</h2>
+    <p class="text-[var(--muted)] text-sm mb-8">Title of Service / Activity</p>
+    <label class="block">
+      <span class="text-xs text-[var(--muted)] font-medium uppercase tracking-wider">Service / Activity Title</span>
+      <textarea id="service-title" rows="3" placeholder="e.g. DOST Scholarship Examination, SETUP Assistance, Training on Food Safety..." class="float-input mt-2 w-full px-4 py-3.5 rounded-xl text-[15px] resize-none">${state.data.serviceTitle}</textarea>
+    </label>
+    <div class="mt-8 grid sm:grid-cols-2 gap-4">
+      <label class="block">
+        <span class="text-xs text-[var(--muted)] font-medium uppercase tracking-wider">Date <span class="font-normal normal-case">(optional)</span></span>
+        <input id="date-input" type="date" value="${state.data.date}" class="float-input mt-2 w-full px-4 py-3.5 rounded-xl text-[15px]">
+      </label>
+      <label class="block">
+        <span class="text-xs text-[var(--muted)] font-medium uppercase tracking-wider">Venue <span class="font-normal normal-case">(optional)</span></span>
+        <input id="venue-input" type="text" value="${state.data.venue}" placeholder="e.g. DOST Regional Office, Legazpi City" class="float-input mt-2 w-full px-4 py-3.5 rounded-xl text-[15px]">
+      </label>
+    </div>
+    <div class="mt-10 p-5 rounded-2xl bg-[var(--accent-soft)] border border-[var(--accent)]/20 flex gap-4">
+      <div class="w-9 h-9 rounded-lg bg-[var(--accent)] text-white flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-circle-info text-sm"></i></div>
+      <div>
+        <div class="font-semibold text-sm">How this form works</div>
+        <p class="text-xs text-[var(--muted)] mt-1 leading-relaxed">You'll rate 6 criteria on a 1–5 scale, mark which attributes matter most to you, draw your digital signature, then submit.</p>
+      </div>
+    </div>
+  </div>`;
+}
+
+function stepRating() {
+  const sparkPath = `M50 5 C 55 35, 65 45, 95 50 C 65 55, 55 65, 50 95 C 45 65, 35 55, 5 50 C 35 45, 45 35, 50 5 Z`;
+  return `<div class="step-content px-6 sm:px-10 py-10">
+    <div class="text-[10px] uppercase tracking-[0.25em] text-[var(--accent)] font-bold mb-2"><span class="accent-line"></span>Step 2 · Part I</div>
+    <h2 class="font-display text-3xl sm:text-4xl font-bold leading-tight mb-2">How would you rate our services?</h2>
+    <p class="text-[var(--muted)] text-sm mb-8">Paano mo ire-rate ang aming serbisyo? Hover over the sparks and click to set your rating.</p>
+    
+    <div class="space-y-4">
+      ${ratingCriteria.map((c, idx) => `
+        <div class="rating-row p-4 sm:p-5 rounded-xl border-2 border-[var(--line)] bg-white" data-criteria="${c.id}">
+          <div class="flex items-baseline justify-between gap-3 mb-4 flex-wrap">
+            <div class="flex items-start gap-3">
+              <span class="font-display text-2xl text-[var(--line)] font-bold w-7 flex-shrink-0">0${idx+1}</span>
+              <div>
+                <div class="font-semibold text-[15px] leading-tight">${c.en}</div>
+                <div class="text-xs text-[var(--muted)] italic mt-0.5">${c.fil}</div>
+              </div>
+            </div>
+          </div>
+          <div class="rating-control flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pl-0 sm:pl-10">
+            <div class="spark-group w-full sm:w-auto justify-between sm:justify-start" data-criteria="${c.id}">
+              ${[1,2,3,4,5].map(v => `
+                <button class="spark-btn" data-value="${v}" data-criteria="${c.id}" aria-label="Rate ${v} out of 5">
+                  <svg viewBox="0 0 100 100" class="spark-svg">
+                    <path d="${sparkPath}" class="spark-path" />
+                  </svg>
+                </button>
+              `).join('')}
+            </div>
+            <div class="rating-label text-xs font-bold uppercase tracking-wider px-3 py-2 rounded-lg bg-[var(--soft)] border border-[var(--line)] w-full sm:w-auto sm:min-w-[160px] text-center" data-criteria="${c.id}">
+              ${state.data.ratings[c.id] ? ratingLabels[state.data.ratings[c.id]-1].label : 'Tap to rate'}
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  </div>`;
+}
+
+function stepImportance() {
+  return `<div class="step-content px-6 sm:px-10 py-10">
+    <div class="text-[10px] uppercase tracking-[0.25em] text-[var(--accent)] font-bold mb-2"><span class="accent-line"></span>Step 3 · Part II</div>
+    <h2 class="font-display text-3xl sm:text-4xl font-bold leading-tight mb-2">What matters most to you?</h2>
+    <p class="text-[var(--muted)] text-sm mb-8">Mark each attribute as <strong class="text-[var(--accent)]">important</strong> or <strong class="text-[var(--ink)]">not important</strong>.</p>
+    <div class="space-y-3">
+      ${ratingCriteria.slice(0, 5).map((c, idx) => {
+        const v = state.data.important[c.id];
+        return `<div class="flex items-center justify-between gap-3 p-4 rounded-xl border-2 border-[var(--line)] bg-[var(--soft)]" data-importance="${c.id}">
+          <div class="flex items-start gap-3 min-w-0">
+            <span class="font-display text-xl text-[var(--line)] font-bold w-6 flex-shrink-0">0${idx+1}</span>
+            <div class="min-w-0">
+              <div class="font-medium text-sm leading-tight">${c.en}</div>
+              <div class="text-[11px] text-[var(--muted)] italic mt-0.5">${c.fil}</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <button class="toggle-btn ${v === 'important' ? 'active-important' : ''} rounded-lg px-3 py-2 text-xs font-semibold flex items-center gap-1.5" data-set="important" data-criteria="${c.id}"><i class="fa-solid fa-check"></i><span class="hidden sm:inline">Important</span></button>
+            <button class="toggle-btn ${v === 'not' ? 'active-not' : ''} rounded-lg px-3 py-2 text-xs font-semibold flex items-center gap-1.5" data-set="not" data-criteria="${c.id}"><i class="fa-solid fa-xmark"></i><span class="hidden sm:inline">Not</span></button>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="mt-8">
+      <label class="block">
+        <span class="text-xs text-[var(--muted)] font-medium uppercase tracking-wider">Other criteria / attributes important to you</span>
+        <textarea id="other-criteria" rows="3" placeholder="Is there anything else that matters to you when receiving our service?" class="float-input mt-2 w-full px-4 py-3.5 rounded-xl text-[15px] resize-none">${state.data.otherCriteria}</textarea>
+      </label>
+    </div>
+  </div>`;
+}
+
+function stepFeedback() {
+  const lowRatings = ratingCriteria.filter(c => state.data.ratings[c.id] && state.data.ratings[c.id] <= 3).map(c => `${c.en} (${state.data.ratings[c.id]})`);
+  return `<div class="step-content px-6 sm:px-10 py-10">
+    <div class="text-[10px] uppercase tracking-[0.25em] text-[var(--accent)] font-bold mb-2"><span class="accent-line"></span>Step 4 · Feedback</div>
+    <h2 class="font-display text-3xl sm:text-4xl font-bold leading-tight mb-2">Tell us more</h2>
+    <p class="text-[var(--muted)] text-sm mb-8">Your insights help us improve our services.</p>
+    ${lowRatings.length > 0 ? `
+    <div class="mb-6 p-5 rounded-2xl bg-[var(--ink)] text-white">
+      <div class="flex items-start gap-3">
+        <div class="w-9 h-9 rounded-lg bg-[var(--accent)] text-white flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-circle-exclamation text-sm"></i></div>
+        <div class="flex-1">
+          <div class="font-semibold text-sm">We noticed some lower ratings</div>
+          <p class="text-xs text-white/70 mt-1 mb-2">Para sa marka na 3, 2, 1, maari po lamang na ibigay ang kadahilanan para mas mapahusay ang aming serbisyo.</p>
+          <div class="flex flex-wrap gap-1.5">
+            ${lowRatings.map(r => `<span class="text-[11px] bg-white/10 border border-[var(--accent)]/50 text-white px-2 py-1 rounded-md font-medium">${r}</span>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>` : ''}
+    <label class="block mb-6">
+      <span class="text-xs text-[var(--muted)] font-medium uppercase tracking-wider">Reason for lower ratings <span class="font-normal normal-case">(if any)</span></span>
+      <textarea id="reason-input" rows="4" placeholder="What can we do to enhance our service?" class="float-input mt-2 w-full px-4 py-3.5 rounded-xl text-[15px] resize-none">${state.data.reason}</textarea>
+    </label>
+    <label class="block">
+      <span class="text-xs text-[var(--muted)] font-medium uppercase tracking-wider">Comments / Suggestions</span>
+      <textarea id="comments-input" rows="4" placeholder="Maaring isulat sa ibaba nito ang iyong komentaryo / mungkahi..." class="float-input mt-2 w-full px-4 py-3.5 rounded-xl text-[15px] resize-none">${state.data.comments}</textarea>
+    </label>
+  </div>`;
+}
+
+function stepInfo() {
+  return `<div class="step-content px-6 sm:px-10 py-10">
+    <div class="text-[10px] uppercase tracking-[0.25em] text-[var(--accent)] font-bold mb-2"><span class="accent-line"></span>Step 5 · Information Source</div>
+    <h2 class="font-display text-3xl sm:text-4xl font-bold leading-tight mb-2">Where did you hear about us?</h2>
+    <p class="text-[var(--muted)] text-sm mb-8">You may check all that apply.</p>
+    <div class="grid sm:grid-cols-2 gap-4 mb-10">
+      ${sourceGroups.map(g => `
+        <div class="border-2 border-[var(--line)] rounded-2xl p-4">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-7 h-7 rounded-md bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center text-xs"><i class="fa-solid ${g.icon}"></i></div>
+            <div class="font-semibold text-sm">${g.title}</div>
+          </div>
+          <div class="space-y-2">
+            ${g.items.map(item => {
+              const checked = state.data.infoSource.includes(item);
+              return `<label class="source-card ${checked ? 'checked' : ''} flex items-center gap-3 p-2.5 rounded-lg cursor-pointer" data-source="${item}">
+                <div class="check-icon w-5 h-5 rounded border-2 border-[var(--line)] flex items-center justify-center text-white text-[10px] flex-shrink-0">${checked ? '<i class="fa-solid fa-check"></i>' : ''}</div>
+                <span class="text-sm">${item}</span>
+              </label>`;
+            }).join('')}
+            <label class="source-card ${state.data.infoSource.includes('Others') ? 'checked' : ''} flex items-center gap-3 p-2.5 rounded-lg cursor-pointer" data-source="Others">
+              <div class="check-icon w-5 h-5 rounded border-2 border-[var(--line)] flex items-center justify-center text-white text-[10px] flex-shrink-0">${state.data.infoSource.includes('Others') ? '<i class="fa-solid fa-check"></i>' : ''}</div>
+              <span class="text-sm">Others:</span>
+              <input type="text" id="others-text" placeholder="Please specify" value="${state.data.othersText || ''}" class="flex-1 text-sm bg-transparent border-b border-[var(--line)] focus:outline-none focus:border-[var(--accent)]">
+            </label>
+          </div>
+        </div>`).join('')}
+    </div>
+    <div class="border-t-2 border-[var(--ink)] pt-8">
+      <h3 class="font-display text-2xl font-bold mb-1">Preferred information source</h3>
+      <p class="text-[var(--muted)] text-sm mb-6">How would you prefer to receive information about future DOST activities? <strong>Please check ONE only.</strong></p>
+      <div class="grid sm:grid-cols-2 gap-3">
+        ${sourceGroups.flatMap(g => g.items.map(item => {
+          const sel = state.data.preferredSource === item;
+          return `<label class="source-card ${sel ? 'checked-single' : ''} flex items-center gap-3 p-3 rounded-xl cursor-pointer" data-preferred="${item}">
+            <div class="radio-dot relative w-5 h-5 rounded-full border-2 border-[var(--line)] flex-shrink-0"></div>
+            <span class="text-sm">${item}</span>
+          </label>`;
+        })).join('')}
+        <label class="source-card ${state.data.preferredSource === 'Others' ? 'checked-single' : ''} flex items-center gap-3 p-3 rounded-xl cursor-pointer" data-preferred="Others">
+          <div class="radio-dot relative w-5 h-5 rounded-full border-2 border-[var(--line)] flex-shrink-0"></div>
+          <span class="text-sm">Others</span>
+        </label>
+      </div>
+    </div>
+  </div>`;
+}
+
+function stepIdentity() {
+  const ratedCount = Object.keys(state.data.ratings).length;
+  const importantCount = Object.values(state.data.important).filter(v => v).length;
+  const sparkPath = `M50 5 C 55 35, 65 45, 95 50 C 65 55, 55 65, 50 95 C 45 65, 35 55, 5 50 C 35 45, 45 35, 50 5 Z`;
+
+  return `<div class="step-content px-6 sm:px-10 py-10">
+    <div class="text-[10px] uppercase tracking-[0.25em] text-[var(--accent)] font-bold mb-2"><span class="accent-line"></span>Step 6 · Identity & Digital Signature</div>
+    <h2 class="font-display text-3xl sm:text-4xl font-bold leading-tight mb-2">Almost there</h2>
+    <p class="text-[var(--muted)] text-sm mb-8">Optional identification, digital signature, and final review.</p>
+    
+    <div class="grid sm:grid-cols-2 gap-4 mb-6">
+      <label class="block">
+        <span class="text-xs text-[var(--muted)] font-medium uppercase tracking-wider">Name <span class="font-normal normal-case">(optional)</span></span>
+        <input id="name-input" type="text" value="${state.data.name}" placeholder="e.g. Juan Dela Cruz" class="float-input mt-2 w-full px-4 py-3.5 rounded-xl text-[15px]">
+      </label>
+      <label class="block">
+        <span class="text-xs text-[var(--muted)] font-medium uppercase tracking-wider">Institution / Company <span class="font-normal normal-case">(optional)</span></span>
+        <input id="institution-input" type="text" value="${state.data.institution}" placeholder="e.g. LGU Legazpi / Bicol University" class="float-input mt-2 w-full px-4 py-3.5 rounded-xl text-[15px]">
+      </label>
+    </div>
+
+    <!-- Digital Signature Module -->
+    <div class="mb-8 p-5 rounded-2xl border-2 border-[var(--line)] bg-white">
+      <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+        <div>
+          <span class="text-xs text-[var(--muted)] font-medium uppercase tracking-wider block">Digital Signature</span>
+          <span class="text-xs text-gray-500">Sign inside the box using your mouse, touchscreen, or stylus.</span>
+        </div>
+        <button type="button" id="clear-sig-btn" class="px-3 py-1.5 rounded-lg border border-gray-300 text-xs font-semibold hover:bg-gray-100 transition-colors flex items-center gap-1.5">
+          <i class="fa-solid fa-eraser"></i> Clear Canvas
+        </button>
+      </div>
+      <div class="sig-canvas-container relative">
+        <canvas id="sig-canvas" class="w-full h-48 cursor-crosshair rounded-xl"></canvas>
+        <div id="sig-placeholder" class="absolute inset-0 flex items-center justify-center pointer-events-none text-gray-400 text-sm font-medium">
+          <i class="fa-solid fa-pen-nib mr-2"></i> Draw your signature here
+        </div>
+      </div>
+    </div>
+
+    <div class="rounded-2xl border-2 border-[var(--line)] overflow-hidden">
+      <div class="px-5 py-3 bg-[var(--ink)] text-white flex items-center justify-between">
+        <div class="font-semibold text-sm flex items-center gap-2"><i class="fa-solid fa-clipboard-check text-[var(--accent)]"></i> Review your responses</div>
+        <div class="text-xs text-white/70">${ratedCount}/6 rated · ${importantCount} marked</div>
+      </div>
+      <div class="divide-y divide-[var(--line)]">
+        <div class="summary-row px-5 py-3 transition-colors">
+          <div class="text-[10px] uppercase tracking-wider text-[var(--muted)] mb-1">Service / Activity</div>
+          <div class="text-sm">${state.data.serviceTitle || '<span class="text-[var(--muted)] italic">Not specified</span>'}</div>
+        </div>
+        ${ratingCriteria.map(c => `
+          <div class="summary-row px-5 py-3 transition-colors flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <div class="text-[10px] uppercase tracking-wider text-[var(--muted)] mb-1">${c.en}</div>
+              <div class="text-sm truncate flex items-center gap-2">
+                ${state.data.ratings[c.id] ? `
+                  <div class="flex gap-0.5">
+                    ${[1,2,3,4,5].map(v => `
+                      <svg viewBox="0 0 100 100" class="w-4 h-4">
+                        <path d="${sparkPath}" fill="${v <= state.data.ratings[c.id] ? (state.data.ratings[c.id] <= 3 ? '#000' : '#00aeef') : 'none'}" stroke="${v <= state.data.ratings[c.id] ? (state.data.ratings[c.id] <= 3 ? '#000' : '#00aeef') : '#E5E7EB'}" stroke-width="8" stroke-linejoin="round" />
+                      </svg>
+                    `).join('')}
+                  </div>
+                  <span class="text-[var(--muted)]">${ratingLabels[state.data.ratings[c.id]-1].label}</span>
+                ` : '<span class="text-[var(--muted)] italic">Not rated</span>'}
+              </div>
+            </div>
+            ${state.data.important[c.id] ? `<span class="text-[10px] px-2 py-1 rounded-md ${state.data.important[c.id] === 'important' ? 'bg-[var(--accent-soft)] text-[var(--accent)]' : 'bg-[var(--ink)] text-white'} font-semibold flex-shrink-0">${state.data.important[c.id] === 'important' ? 'IMPORTANT' : 'NOT IMPORTANT'}</span>` : ''}
+          </div>`).join('')}
+        ${state.data.comments ? `<div class="summary-row px-5 py-3"><div class="text-[10px] uppercase tracking-wider text-[var(--muted)] mb-1">Comments</div><div class="text-sm">${state.data.comments}</div></div>` : ''}
+        ${state.data.infoSource.length ? `<div class="summary-row px-5 py-3"><div class="text-[10px] uppercase tracking-wider text-[var(--muted)] mb-1">Information Source</div><div class="text-sm">${state.data.infoSource.join(', ')}</div></div>` : ''}
+        ${state.data.preferredSource ? `<div class="summary-row px-5 py-3"><div class="text-[10px] uppercase tracking-wider text-[var(--muted)] mb-1">Preferred Source</div><div class="text-sm">${state.data.preferredSource}</div></div>` : ''}
+      </div>
+    </div>
+    <p class="text-xs text-[var(--muted)] mt-6 leading-relaxed">By submitting, you confirm that your responses are accurate and complete to the best of your knowledge. Your feedback will be saved and formatted into the DOST Region V QMS-F4 official document.</p>
+  </div>`;
+}
+
+function stepThankYou() {
+  const ratedCount = Object.keys(state.data.ratings).length;
+  const avg = ratedCount ? (Object.values(state.data.ratings).reduce((a,b)=>a+b,0) / ratedCount).toFixed(2) : '—';
+  return `<div class="step-content px-6 sm:px-10 py-16 text-center">
+    <div class="checkmark-anim inline-flex items-center justify-center w-20 h-20 mb-6">
+      <svg viewBox="0 0 100 100" class="w-full h-full">
+        <circle cx="50" cy="50" r="45" fill="none" stroke="#00aeef" stroke-width="3" class="circle-draw"/>
+        <path d="M30 52 L45 67 L72 38" fill="none" stroke="#00aeef" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style="stroke-dasharray:60;stroke-dashoffset:60;animation:drawCircle 0.5s 0.4s ease-out forwards;"/>
+      </svg>
+    </div>
+    <h2 class="font-display text-4xl sm:text-5xl font-bold mb-3">Salamat po!</h2>
+    <p class="text-[var(--muted)] text-base max-w-md mx-auto mb-8">Your feedback has been recorded and saved. Thank you for helping us serve you better.</p>
+    <div class="inline-flex items-center gap-6 px-6 py-4 rounded-2xl bg-[var(--soft)] border-2 border-[var(--line)] mb-8">
+      <div class="text-center">
+        <div class="font-display text-3xl font-bold text-[var(--accent)]">${ratedCount}<span class="text-base text-[var(--muted)]">/6</span></div>
+        <div class="text-[10px] uppercase tracking-wider text-[var(--muted)]">Criteria Rated</div>
+      </div>
+      <div class="w-px h-10 bg-[var(--line)]"></div>
+      <div class="text-center">
+        <div class="font-display text-3xl font-bold text-[var(--accent)]">${avg}</div>
+        <div class="text-[10px] uppercase tracking-wider text-[var(--muted)]">Average Score</div>
+      </div>
+    </div>
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+      <button id="new-form-btn" class="btn-primary text-sm font-semibold px-6 py-3 rounded-xl flex items-center gap-2"><i class="fa-solid fa-rotate-right text-xs"></i> Submit Another Response</button>
+      <button id="print-btn" class="text-sm font-medium text-[var(--ink)] px-6 py-3 rounded-xl border-2 border-[var(--line)] hover:border-[var(--accent)] transition-colors flex items-center gap-2"><i class="fa-solid fa-print text-xs"></i> Print Official QMS-F4 Doc</button>
+    </div>
+  </div>`;
+}
+
+const renderers = [stepService, stepRating, stepImportance, stepFeedback, stepInfo, stepIdentity];
+
+function render() {
+  if (state.step >= renderers.length) {
+    populatePrintDocument();
+    $('#step-container').innerHTML = stepThankYou();
+    $('#prev-btn').style.display = 'none';
+    $('#next-btn').style.display = 'none';
+    const progressContainer = document.querySelector('.max-w-5xl > div.mb-6');
+    if (progressContainer) progressContainer.style.display = 'none';
+    bindThankYou();
+    return;
+  }
+  $('#step-container').innerHTML = renderers[state.step]();
+  updateProgress();
+  bindStep();
+  window.scrollTo({ top: $('#step-container').offsetTop - 100, behavior: 'smooth' });
+}
+
+// === DIGITAL SIGNATURE CANVAS HANDLER ===
+let sigCanvas, sigCtx, isDrawing = false, hasSignature = false, dpr = 1;
+
+function initSignatureCanvas() {
+  sigCanvas = $('#sig-canvas');
+  if (!sigCanvas) return;
+  sigCtx = sigCanvas.getContext('2d');
+  
+  const rect = sigCanvas.getBoundingClientRect();
+  dpr = window.devicePixelRatio || 1;
+  sigCanvas.width = Math.floor(rect.width * dpr);
+  sigCanvas.height = Math.floor(rect.height * dpr);
+  sigCtx.scale(dpr, dpr);
+  
+  sigCtx.strokeStyle = '#0F172A';
+  sigCtx.lineWidth = 3;
+  sigCtx.lineCap = 'round';
+  sigCtx.lineJoin = 'round';
+
+  if (state.data.signature && state.data.signature.startsWith('data:image')) {
+    const img = new Image();
+    img.onload = () => {
+      sigCtx.drawImage(img, 0, 0, rect.width, rect.height);
+      hasSignature = true;
+      const ph = $('#sig-placeholder');
+      if (ph) ph.style.display = 'none';
+    };
+    img.src = state.data.signature;
+  }
+
+  function getPos(e) {
+    const r = sigCanvas.getBoundingClientRect();
+    const touch = (e.touches && e.touches.length > 0) ? e.touches[0] : (e.changedTouches && e.changedTouches.length > 0 ? e.changedTouches[0] : e);
+    const clientX = touch.clientX;
+    const clientY = touch.clientY;
+
+    const scaleX = r.width > 0 ? ((sigCanvas.width / dpr) / r.width) : 1;
+    const scaleY = r.height > 0 ? ((sigCanvas.height / dpr) / r.height) : 1;
+
+    return {
+      x: (clientX - r.left) * scaleX,
+      y: (clientY - r.top) * scaleY
+    };
+  }
+
+  function startDraw(e) {
+    isDrawing = true;
+    const p = getPos(e);
+    sigCtx.beginPath();
+    sigCtx.moveTo(p.x, p.y);
+    const ph = $('#sig-placeholder');
+    if (ph) ph.style.display = 'none';
+  }
+
+  function draw(e) {
+    if (!isDrawing) return;
+    e.preventDefault();
+    const p = getPos(e);
+    sigCtx.lineTo(p.x, p.y);
+    sigCtx.stroke();
+    hasSignature = true;
+  }
+
+  function stopDraw() {
+    if (!isDrawing) return;
+    isDrawing = false;
+    if (hasSignature) {
+      state.data.signature = sigCanvas.toDataURL('image/png');
+    }
+  }
+
+  sigCanvas.addEventListener('mousedown', startDraw);
+  sigCanvas.addEventListener('mousemove', draw);
+  sigCanvas.addEventListener('mouseup', stopDraw);
+  sigCanvas.addEventListener('mouseleave', stopDraw);
+
+  sigCanvas.addEventListener('touchstart', startDraw, { passive: false });
+  sigCanvas.addEventListener('touchmove', draw, { passive: false });
+  sigCanvas.addEventListener('touchend', stopDraw);
+
+  $('#clear-sig-btn')?.addEventListener('click', () => {
+    sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+    hasSignature = false;
+    state.data.signature = '';
+    const ph = $('#sig-placeholder');
+    if (ph) ph.style.display = 'flex';
+  });
+}
+
+// === POPULATE PRINTABLE QMS-F4 DOCUMENT ===
+function populatePrintDocument() {
+  $('#print-service-title').textContent = state.data.serviceTitle || 'N/A';
+  $('#print-date').textContent = state.data.date || new Date().toLocaleDateString();
+  $('#print-venue').textContent = state.data.venue || 'DOST Region V';
+  $('#print-name').textContent = state.data.name || 'Anonymous';
+  $('#print-institution').textContent = state.data.institution || 'N/A';
+  $('#print-other-criteria').textContent = state.data.otherCriteria || 'None';
+  $('#print-reason').textContent = state.data.reason || 'None specified';
+  $('#print-comments').textContent = state.data.comments || 'None';
+  $('#print-info-sources').textContent = state.data.infoSource.join(', ') || 'None';
+  $('#print-preferred-source').textContent = state.data.preferredSource || 'None';
+
+  // Part 1 Rows (Material 3 Aesthetic Design)
+  const p1Body = $('#print-part1-body');
+  p1Body.innerHTML = ratingCriteria.map(c => {
+    const val = state.data.ratings[c.id] || 0;
+    const checkBadge = `<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[var(--accent-soft)] text-[var(--accent-dark)] font-bold text-sm">✓</span>`;
+    return `<tr class="border-b border-slate-100 text-sm hover:bg-slate-50/50">
+      <td class="p-2.5 font-medium border-r border-slate-200">
+        <div class="font-bold text-[16px] leading-tight text-slate-900">${c.en}</div>
+        <div class="text-xs text-slate-500 italic leading-tight mt-0.5">${c.fil}</div>
+      </td>
+      <td class="p-1 text-center border-r border-slate-200">${val === 5 ? checkBadge : ''}</td>
+      <td class="p-1 text-center border-r border-slate-200">${val === 4 ? checkBadge : ''}</td>
+      <td class="p-1 text-center border-r border-slate-200">${val === 3 ? checkBadge : ''}</td>
+      <td class="p-1 text-center border-r border-slate-200">${val === 2 ? checkBadge : ''}</td>
+      <td class="p-1 text-center">${val === 1 ? checkBadge : ''}</td>
+    </tr>`;
+  }).join('');
+
+  // Part 2 Rows (Material 3 Aesthetic Design)
+  const p2Body = $('#print-part2-body');
+  p2Body.innerHTML = ratingCriteria.slice(0, 5).map(c => {
+    const status = state.data.important[c.id];
+    let statusBadge = '<span class="text-slate-400">—</span>';
+    if (status === 'important') {
+      statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-cyan-50 text-[var(--accent-dark)] border border-cyan-200 font-bold text-xs">✓ IMPORTANT</span>`;
+    } else if (status === 'not') {
+      statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-300 font-bold text-xs">✗ NOT</span>`;
+    }
+    return `<tr class="border-b border-slate-100 text-sm hover:bg-slate-50/50">
+      <td class="p-2.5 font-bold text-[16px] leading-tight text-slate-900 border-r border-slate-200">${c.en}</td>
+      <td class="p-1 text-center">${statusBadge}</td>
+    </tr>`;
+  }).join('');
+
+  // Signature
+  const sigImg = $('#print-signature-img');
+  const sigTxt = $('#print-signature-text');
+  if (state.data.signature && state.data.signature.startsWith('data:image')) {
+    sigImg.src = state.data.signature;
+    sigImg.classList.remove('hidden');
+    sigTxt.classList.add('hidden');
+  } else {
+    sigImg.classList.add('hidden');
+    sigTxt.classList.remove('hidden');
+    sigTxt.textContent = state.data.name ? state.data.name : 'Digital Signature';
+  }
+}
+
+// === EVENT BINDING ===
+
+function applyRatingState(group, ratingVal) {
+  const buttons = group.querySelectorAll('.spark-btn');
+  buttons.forEach((btn, i) => {
+    const path = btn.querySelector('.spark-path');
+    path.classList.remove('filled', 'filled-low');
+    if (ratingVal && (i + 1) <= ratingVal) {
+      if (ratingVal <= 3) path.classList.add('filled-low');
+      else path.classList.add('filled');
+    }
+  });
+}
+
+function bindStep() {
+  if (state.step === 0) {
+    $('#service-title')?.addEventListener('input', e => state.data.serviceTitle = e.target.value);
+    $('#date-input')?.addEventListener('input', e => state.data.date = e.target.value);
+    $('#venue-input')?.addEventListener('input', e => state.data.venue = e.target.value);
+  }
+  
+  if (state.step === 1) {
+    document.querySelectorAll('.spark-group').forEach(group => {
+      const crit = group.dataset.criteria;
+      applyRatingState(group, state.data.ratings[crit]);
+
+      const label = document.querySelector(`.rating-label[data-criteria="${crit}"]`);
+      
+      group.querySelectorAll('.spark-btn').forEach(btn => {
+        const val = parseInt(btn.dataset.value);
+
+        btn.addEventListener('mouseenter', () => {
+          applyRatingState(group, val);
+          label.textContent = ratingLabels[val-1].label;
+          label.style.color = val <= 3 ? 'var(--ink)' : 'var(--accent)';
+          label.style.borderColor = val <= 3 ? 'var(--ink)' : 'var(--accent)';
+          label.style.backgroundColor = val <= 3 ? 'rgba(0,0,0,0.05)' : 'var(--accent-soft)';
+        });
+
+        btn.addEventListener('click', () => {
+          state.data.ratings[crit] = val;
+          applyRatingState(group, val);
+          label.textContent = ratingLabels[val-1].label;
+          label.style.color = val <= 3 ? 'var(--ink)' : 'var(--accent)';
+          label.style.borderColor = val <= 3 ? 'var(--ink)' : 'var(--accent)';
+          label.style.backgroundColor = val <= 3 ? 'rgba(0,0,0,0.05)' : 'var(--accent-soft)';
+
+          const buttons = group.querySelectorAll('.spark-btn');
+          buttons.forEach((b, i) => {
+            if ((i + 1) <= val) {
+              b.classList.remove('animate-pop');
+              void b.offsetWidth;
+              setTimeout(() => b.classList.add('animate-pop'), i * 60);
+              setTimeout(() => b.classList.remove('animate-pop'), i * 60 + 500);
+            }
+          });
+        });
+      });
+
+      group.addEventListener('mouseleave', () => {
+        const savedVal = state.data.ratings[crit];
+        applyRatingState(group, savedVal);
+        if (savedVal) {
+          label.textContent = ratingLabels[savedVal-1].label;
+          label.style.color = savedVal <= 3 ? 'var(--ink)' : 'var(--accent)';
+          label.style.borderColor = savedVal <= 3 ? 'var(--ink)' : 'var(--accent)';
+          label.style.backgroundColor = savedVal <= 3 ? 'rgba(0,0,0,0.05)' : 'var(--accent-soft)';
+        } else {
+          label.textContent = 'Tap to rate';
+          label.style.color = 'var(--muted)';
+          label.style.borderColor = 'var(--line)';
+          label.style.backgroundColor = 'var(--soft)';
+        }
+      });
+    });
+  }
+
+  if (state.step === 2) {
+    document.querySelectorAll('.toggle-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const c = btn.dataset.criteria, s = btn.dataset.set;
+        state.data.important[c] = state.data.important[c] === s ? null : s;
+        const row = btn.closest('[data-importance]');
+        row.querySelectorAll('.toggle-btn').forEach(b => {
+          b.classList.remove('active-important', 'active-not');
+          if (state.data.important[c] === b.dataset.set) b.classList.add(b.dataset.set === 'important' ? 'active-important' : 'active-not');
+        });
+      });
+    });
+    $('#other-criteria')?.addEventListener('input', e => state.data.otherCriteria = e.target.value);
+  }
+  if (state.step === 3) {
+    $('#reason-input')?.addEventListener('input', e => state.data.reason = e.target.value);
+    $('#comments-input')?.addEventListener('input', e => state.data.comments = e.target.value);
+  }
+  if (state.step === 4) {
+    document.querySelectorAll('[data-source]').forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (e.target.tagName === 'INPUT') return;
+        const src = card.dataset.source;
+        const idx = state.data.infoSource.indexOf(src);
+        if (idx > -1) state.data.infoSource.splice(idx, 1); else state.data.infoSource.push(src);
+        const icon = card.querySelector('.check-icon');
+        if (state.data.infoSource.includes(src)) { card.classList.add('checked'); icon.innerHTML = '<i class="fa-solid fa-check"></i>'; }
+        else { card.classList.remove('checked'); icon.innerHTML = ''; }
+      });
+    });
+    $('#others-text')?.addEventListener('input', e => state.data.othersText = e.target.value);
+    $('#others-text')?.addEventListener('click', e => e.stopPropagation());
+    document.querySelectorAll('[data-preferred]').forEach(card => {
+      card.addEventListener('click', () => {
+        state.data.preferredSource = card.dataset.preferred;
+        document.querySelectorAll('[data-preferred]').forEach(c => c.classList.remove('checked-single'));
+        card.classList.add('checked-single');
+      });
+    });
+  }
+  if (state.step === 5) {
+    $('#name-input')?.addEventListener('input', e => state.data.name = e.target.value);
+    $('#institution-input')?.addEventListener('input', e => state.data.institution = e.target.value);
+    initSignatureCanvas();
+  }
+}
+
+function bindThankYou() {
+  $('#new-form-btn')?.addEventListener('click', () => {
+    state.step = 0;
+    state.data = { serviceTitle: '', ratings: {}, important: {}, otherCriteria: '', reason: '', comments: '', signature: '', name: '', institution: '', infoSource: [], preferredSource: '', othersText: '', date: '', venue: '' };
+    $('#prev-btn').style.display = '';
+    $('#next-btn').style.display = '';
+    const progressContainer = document.querySelector('.max-w-5xl > div.mb-6');
+    if (progressContainer) progressContainer.style.display = '';
+    render();
+  });
+  $('#print-btn')?.addEventListener('click', () => {
+    populatePrintDocument();
+    window.print();
+  });
+}
+
+function validateStep() {
+  if (state.step === 0 && !state.data.serviceTitle.trim()) { toast('Please enter the service/activity title', 'warn'); $('#service-title')?.focus(); return false; }
+  if (state.step === 1) { const m = ratingCriteria.find(c => !state.data.ratings[c.id]); if (m) { toast(`Please rate: ${m.en}`, 'warn'); return false; } }
+  if (state.step === 4) {
+    if (state.data.infoSource.length === 0) { toast('Please select at least one information source', 'warn'); return false; }
+    if (!state.data.preferredSource) { toast('Please select your preferred information source', 'warn'); return false; }
+  }
+  return true;
+}
+
+async function submitFeedback() {
+  try {
+    toast('Saving feedback to Google Docs...', 'info');
+    const response = await fetch('/api/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(state.data)
+    });
+    const resData = await response.json();
+    if (resData.success) {
+      toast('Feedback saved to Google Docs!', 'success');
+    } else {
+      toast('Feedback submitted locally (Google Docs sync optional)', 'info');
+    }
+  } catch (err) {
+    console.log('API Submission:', err);
+    toast('Feedback recorded successfully', 'success');
+  }
+}
+
+$('#next-btn').addEventListener('click', async () => {
+  if (!validateStep()) return;
+  if (state.step === renderers.length - 1) {
+    await submitFeedback();
+    state.step = renderers.length;
+    render();
+    return;
+  }
+  state.step++;
+  render();
+});
+$('#prev-btn').addEventListener('click', () => { if (state.step > 0) { state.step--; render(); } });
+
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === 'ArrowRight' && !$('#next-btn').disabled) $('#next-btn').click();
+  if (e.key === 'ArrowLeft' && !$('#prev-btn').disabled) $('#prev-btn').click();
+});
+
+render();
+</script>
+</body>
+</html>

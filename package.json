@@ -1,0 +1,18 @@
+{
+  "name": "dost-csf-webapp",
+  "version": "1.0.0",
+  "description": "DOST Region V Customer Satisfaction Feedback WebApp with Google Docs sync & Local Analytics",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "dost",
+    "csf",
+    "feedback",
+    "analytics"
+  ],
+  "author": "DOST Region V",
+  "license": "ISC"
+}

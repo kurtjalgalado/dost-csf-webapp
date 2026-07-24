@@ -1,0 +1,24 @@
+# Environment & Secrets
+.env
+.env.*
+
+# Dependencies
+node_modules/
+
+# Build & Deployment
+.vercel/
+
+# Skills Directory
+skills/
+
+# Data Directory
+data/
+
+# QMS Document & Legacy Draft Webform
+*.doc
+QMS-F4 Customer Satisfaction Feedback.doc
+CSF - Webform.html
+
+# Logs
+*.log
+npm-debug.log*
